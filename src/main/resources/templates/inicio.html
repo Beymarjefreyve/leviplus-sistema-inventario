@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Inicio')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Bienvenido, <span th:text="${nombre}">Usuario</span></h1>
+    <p>Rol: <strong th:text="${rol}">Administrador</strong></p>
+</main>
+</body>
+</html>

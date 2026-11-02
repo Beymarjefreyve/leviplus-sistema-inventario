@@ -1,0 +1,37 @@
+﻿# Maven / Gradle
+target/
+build/
+.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.apt_generated/
+nbproject/
+.antigravity/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Secretos y configuracion local: NUNCA subir al repositorio
+.env
+*.env
+!.env.example
+application-local.properties
+secrets/
+
+# Logs y temporales
+*.log
+logs/
+*.tmp
+*.bak
+hs_err_pid*
+
+# Datos locales de Docker
+pgdata/

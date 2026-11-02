@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión · Levi Plus</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="pagina-acceso">
+<main class="tarjeta-acceso">
+    <h1>Levi Plus</h1>
+    <p class="subtitulo">Control de inventario y gestión operativa</p>
+
+    <!-- El mensaje no revela si fallo el usuario o la contrasena -->
+    <p class="mensaje error" th:if="${param.error}">Usuario o contraseña incorrectos, o cuenta desactivada.</p>
+    <p class="mensaje ok" th:if="${param.salio}">Cerraste sesión correctamente.</p>
+
+    <form th:action="@{/login}" method="post">
+        <label for="username">Usuario</label>
+        <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+        <button type="submit">Ingresar</button>
+    </form>
+</main>
+</body>
+</html>

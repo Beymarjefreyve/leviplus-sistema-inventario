@@ -1,0 +1,84 @@
+:root {
+    --verde: #0f6b6b;
+    --verde-oscuro: #0a4d4d;
+    --fondo: #f4f7f7;
+    --texto: #1c2a2a;
+    --borde: #d3dede;
+    --error: #b3261e;
+    --ok: #1b6e3a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--texto);
+    background: var(--fondo);
+}
+
+/* ---- Acceso y paginas de error ---- */
+.pagina-acceso {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarjeta-acceso {
+    width: min(92vw, 380px);
+    padding: 2rem;
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .06);
+}
+
+.tarjeta-acceso h1 { margin: 0; color: var(--verde); }
+.subtitulo { margin: .25rem 0 1.25rem; color: #5b6b6b; }
+
+form label { display: block; margin: .9rem 0 .25rem; font-weight: 600; }
+form input {
+    width: 100%;
+    padding: .6rem .7rem;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+form input:focus { outline: 2px solid var(--verde); outline-offset: 1px; }
+
+button {
+    margin-top: 1.2rem;
+    width: 100%;
+    padding: .7rem;
+    border: 0;
+    border-radius: 8px;
+    background: var(--verde);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+button:hover { background: var(--verde-oscuro); }
+
+.mensaje { padding: .6rem .8rem; border-radius: 8px; font-size: .92rem; }
+.mensaje.error { background: #fdecea; color: var(--error); }
+.mensaje.ok { background: #e6f4ea; color: var(--ok); }
+
+/* ---- Aplicacion con menu lateral ---- */
+.con-menu { display: flex; min-height: 100vh; }
+
+.menu {
+    width: 230px;
+    padding: 1rem;
+    background: var(--verde-oscuro);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+.menu .marca { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.2rem; }
+.menu nav { flex: 1; display: flex; flex-direction: column; gap: .25rem; }
+.menu nav a { color: #dff1f1; text-decoration: none; padding: .5rem .6rem; border-radius: 6px; }
+.menu nav a:hover { background: rgba(255, 255, 255, .12); }
+.menu .cerrar-sesion button { background: rgba(255, 255, 255, .15); margin-top: 0; }
+
+.contenido { flex: 1; padding: 1.5rem 2rem; }

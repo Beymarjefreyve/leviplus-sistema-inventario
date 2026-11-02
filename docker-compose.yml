@@ -1,0 +1,20 @@
+# Base de datos PostgreSQL local para desarrollo.
+#   docker compose up -d db      (levanta la base y crea las tablas con db/esquema.sql)
+#   docker compose down -v       (la borra, incluidos los datos)
+# Las credenciales salen del archivo .env (copiado de .env.example).
+services:
+  db:
+    image: postgres:16
+    container_name: leviplus-db
+    environment:
+      POSTGRES_DB: leviplus
+      POSTGRES_USER: ${DB_USER:-leviplus}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en el archivo .env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/main/resources/db/esquema.sql:/docker-entrypoint-initdb.d/01-esquema.sql:ro
+
+volumes:
+  pgdata:
