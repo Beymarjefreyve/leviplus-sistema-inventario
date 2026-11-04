@@ -1,9 +1,5 @@
 package com.leviplus.acceso.model;
 
-/**
- * Roles del sistema (tabla ROL). Se modelan como enumeracion y no como herencia de Usuario:
- * solo cambian los permisos segun la matriz de permisos del documento ingenieril (seccion 1.3).
- */
 public enum Rol {
 
     ADMINISTRADOR(1, "Administrador"),
@@ -17,7 +13,6 @@ public enum Rol {
         this.nombre = nombre;
     }
 
-    /** Identificador en la tabla ROL (columna id_rol). */
     public int getId() {
         return id;
     }
@@ -26,7 +21,6 @@ public enum Rol {
         return nombre;
     }
 
-    /** Nombre de la autoridad en Spring Security, por ejemplo ROLE_ADMINISTRADOR. */
     public String autoridad() {
         return "ROLE_" + name();
     }

@@ -8,11 +8,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Seguridad (RNF-05): sesion obligatoria en todas las rutas salvo el acceso, contrasenas con BCrypt,
- * proteccion CSRF activa y autorizacion por rol en el servidor con @PreAuthorize en cada controlador
- * (hasRole("ADMINISTRADOR") o hasAnyRole("ADMINISTRADOR", "ENCARGADO_DE_VENTAS")).
- */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {

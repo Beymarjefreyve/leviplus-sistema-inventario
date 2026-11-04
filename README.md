@@ -64,7 +64,6 @@ credenciales se entregan **solo como variables de entorno** (`DB_URL`, `DB_USER`
 `LEVIPLUS_ADMIN_USER`, `LEVIPLUS_ADMIN_PASSWORD`). Las tablas se crean una vez ejecutando
 `src/main/resources/db/esquema.sql` en el editor SQL de Neon.
 
-## Seguridad del repositorio
+## Colaboración
 
-Este repositorio es público. **Nunca** subas contraseñas, cadenas de conexión ni datos reales de la droguería
-(clientes, teléfonos, inventario). Consulta [CONTRIBUTING.md](CONTRIBUTING.md).
+Flujo de ramas, formato de commits y convenciones de código en [CONTRIBUTING.md](CONTRIBUTING.md).

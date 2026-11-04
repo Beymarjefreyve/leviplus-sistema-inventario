@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
-/** Persona que ingresa al sistema con un rol asignado (tabla USUARIO). No se elimina: se desactiva. */
 @Entity
 @Table(name = "usuario")
 public class Usuario {
@@ -39,7 +38,6 @@ public class Usuario {
     private LocalDateTime fechaRegistro;
 
     protected Usuario() {
-        // requerido por JPA
     }
 
     public Usuario(String nombreCompleto, String nombreUsuario, String contrasenaHash, Rol rol) {

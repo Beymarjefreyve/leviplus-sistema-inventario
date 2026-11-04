@@ -1,7 +1,3 @@
-# Base de datos PostgreSQL local para desarrollo.
-#   docker compose up -d db      (levanta la base y crea las tablas con db/esquema.sql)
-#   docker compose down -v       (la borra, incluidos los datos)
-# Las credenciales salen del archivo .env (copiado de .env.example).
 services:
   db:
     image: postgres:16
