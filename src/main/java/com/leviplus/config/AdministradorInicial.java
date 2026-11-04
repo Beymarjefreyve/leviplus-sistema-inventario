@@ -11,11 +11,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-/**
- * Crea el primer administrador al arrancar si la tabla usuario esta vacia, con las credenciales
- * de las variables de entorno LEVIPLUS_ADMIN_USER y LEVIPLUS_ADMIN_PASSWORD. Asi ninguna
- * contrasena queda escrita en el repositorio.
- */
 @Component
 public class AdministradorInicial implements ApplicationRunner {
 

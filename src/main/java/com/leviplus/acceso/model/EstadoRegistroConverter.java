@@ -3,7 +3,6 @@ package com.leviplus.acceso.model;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-/** El modelo de datos guarda el estado en minusculas ('activo', 'inactivo'). */
 @Converter(autoApply = true)
 public class EstadoRegistroConverter implements AttributeConverter<EstadoRegistro, String> {
 

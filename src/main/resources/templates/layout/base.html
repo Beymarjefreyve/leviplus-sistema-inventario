@@ -8,19 +8,10 @@
 </head>
 <body>
 
-<!--
-  Menu lateral comun. Solo muestra las opciones permitidas para el rol (ayuda de usabilidad);
-  la autorizacion real se aplica en el servidor con @PreAuthorize en cada controlador.
-  Cada modulo agrega aqui sus enlaces cuando se implementa.
--->
 <aside th:fragment="menu" class="menu">
     <div class="marca">Levi Plus</div>
     <nav>
         <a th:href="@{/}">Inicio</a>
-        <!-- Iteracion 1: usuarios, productos, proveedores, entradas y salidas -->
-        <!-- Iteracion 2: ventas, historial, devoluciones, clientes y pedidos -->
-        <!-- Iteracion 3: ingresos, egresos y balance -->
-        <!-- Iteracion 4: alertas, existencias y reportes -->
     </nav>
     <form th:action="@{/logout}" method="post" class="cerrar-sesion">
         <button type="submit">Cerrar sesión</button>

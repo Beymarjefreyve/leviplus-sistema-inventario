@@ -1,12 +1,10 @@
 # Guía de colaboración
 
-## Reglas de oro (el repositorio es público)
+## Credenciales y datos
 
-- **Nada de secretos en git:** contraseñas, cadenas de conexión de Neon, claves de sesión. Todo va en el archivo
-  `.env` (ignorado) o en variables de entorno de Cloud Run.
-- **Nada de datos reales** de la droguería en scripts, pruebas, capturas o README. Usa datos ficticios.
-- Si una clave se sube por error, **cámbiala de inmediato** (en Neon se regenera desde el panel). Borrar el
-  archivo no basta: queda en el historial.
+El repositorio es público. Las contraseñas, la cadena de conexión de Neon y las claves de sesión se definen en el
+archivo `.env` (ignorado por git) o en variables de entorno de Cloud Run. Los scripts y las pruebas usan datos
+ficticios. Si una clave llega a subirse, se cambia en Neon, porque borrar el archivo no la quita del historial.
 
 ## Flujo de trabajo
 

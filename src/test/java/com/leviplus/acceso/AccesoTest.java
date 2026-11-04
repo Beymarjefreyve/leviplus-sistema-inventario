@@ -20,7 +20,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** RF-01: inicio de sesion, rechazo de credenciales invalidas y de cuentas desactivadas. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

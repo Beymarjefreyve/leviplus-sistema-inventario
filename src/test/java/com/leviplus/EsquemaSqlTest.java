@@ -13,7 +13,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Comprueba que db/esquema.sql se ejecuta completo y crea las 16 tablas del modelo logico. */
 class EsquemaSqlTest {
 
     private static final Set<String> TABLAS = Set.of(
