@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera(${usuarioEditado == null} ? 'Nuevo usuario' : 'Editar usuario')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1 th:text="${usuarioEditado == null} ? 'Nuevo usuario' : 'Editar usuario'">Usuario</h1>
+
+    <form class="formulario"
+          th:action="${usuarioEditado == null} ? @{/usuarios} : @{/usuarios/{id}(id=${usuarioEditado.idUsuario})}"
+          th:object="${usuarioForm}" method="post">
+        <p class="mensaje error" th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
+
+        <label for="nombreCompleto">Nombre completo</label>
+        <input id="nombreCompleto" th:field="*{nombreCompleto}" type="text" maxlength="100">
+        <span class="campo-error" th:if="${#fields.hasErrors('nombreCompleto')}" th:errors="*{nombreCompleto}"></span>
+
+        <label for="nombreUsuario">Nombre de usuario</label>
+        <input id="nombreUsuario" th:field="*{nombreUsuario}" type="text" maxlength="50"
+               th:readonly="${usuarioEditado != null}" autocomplete="off">
+        <span class="campo-error" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></span>
+
+        <label for="contrasena" th:text="${usuarioEditado == null} ? 'Contraseña' : 'Nueva contraseña (opcional)'">Contraseña</label>
+        <input id="contrasena" th:field="*{contrasena}" type="password" maxlength="72" autocomplete="new-password">
+        <span class="ayuda">Mínimo 8 caracteres.</span>
+        <span class="campo-error" th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"></span>
+
+        <label for="rol">Rol</label>
+        <select id="rol" th:field="*{rol}">
+            <option value="">Selecciona un rol</option>
+            <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.nombre}">Rol</option>
+        </select>
+        <span class="campo-error" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></span>
+
+        <div class="botones">
+            <button type="submit">Guardar</button>
+            <a class="boton secundario" th:href="@{/usuarios}">Cancelar</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

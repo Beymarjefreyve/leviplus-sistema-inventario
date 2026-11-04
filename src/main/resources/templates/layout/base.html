@@ -12,6 +12,7 @@
     <div class="marca">Levi Plus</div>
     <nav>
         <a th:href="@{/}">Inicio</a>
+        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/usuarios}">Usuarios</a>
     </nav>
     <form th:action="@{/logout}" method="post" class="cerrar-sesion">
         <button type="submit">Cerrar sesión</button>
