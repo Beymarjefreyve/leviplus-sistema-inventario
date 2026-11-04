@@ -80,3 +80,47 @@ button:hover { background: var(--verde-oscuro); }
 .menu .cerrar-sesion button { background: rgba(255, 255, 255, .15); margin-top: 0; }
 
 .contenido { flex: 1; padding: 1.5rem 2rem; }
+
+/* Tablas, formularios y acciones de los módulos */
+.barra-titulo { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.barra-titulo h1 { margin: .2rem 0; }
+
+a.boton, .boton {
+    display: inline-block;
+    padding: .55rem 1rem;
+    border-radius: 8px;
+    background: var(--verde);
+    color: #fff;
+    text-decoration: none;
+    font-size: .95rem;
+}
+a.boton:hover { background: var(--verde-oscuro); }
+a.boton.secundario { background: #e3ecec; color: var(--texto); }
+a.boton.secundario:hover { background: #d3dede; }
+
+.tabla { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; margin-top: 1rem; }
+.tabla th, .tabla td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--borde); }
+.tabla th { background: #eaf2f2; font-size: .9rem; }
+.tabla tr:last-child td { border-bottom: 0; }
+.tabla .acciones { display: flex; gap: .6rem; align-items: center; }
+.tabla .acciones form { margin: 0; }
+.tabla .acciones button { margin: 0; width: auto; padding: .3rem .7rem; font-size: .85rem; }
+.tabla .acciones a { color: var(--verde); }
+
+button.peligro { background: var(--error); }
+button.peligro:hover { background: #8c1d18; }
+
+.etiqueta { padding: .15rem .55rem; border-radius: 999px; font-size: .8rem; }
+.etiqueta.activo { background: #e6f4ea; color: var(--ok); }
+.etiqueta.inactivo { background: #eceff0; color: #5b6b6b; }
+.etiqueta.alerta { background: #fdecea; color: var(--error); }
+
+.formulario { max-width: 480px; background: #fff; padding: 1.2rem 1.4rem; border: 1px solid var(--borde); border-radius: 12px; margin-top: 1rem; }
+.formulario select, .formulario textarea {
+    width: 100%; padding: .6rem .7rem; border: 1px solid var(--borde); border-radius: 8px; font-size: 1rem; background: #fff;
+}
+.formulario .botones { display: flex; gap: .6rem; align-items: center; margin-top: 1.2rem; }
+.formulario .botones button { margin-top: 0; width: auto; padding: .6rem 1.2rem; }
+.campo-error { display: block; color: var(--error); font-size: .85rem; margin-top: .2rem; }
+.ayuda { display: block; color: #5b6b6b; font-size: .82rem; margin-top: .2rem; }
+.resumen { background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: .7rem 1rem; margin: 1rem 0 0; }
