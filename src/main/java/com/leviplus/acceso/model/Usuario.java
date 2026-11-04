@@ -70,6 +70,15 @@ public class Usuario {
         this.rol = nuevoRol;
     }
 
+    public void actualizar(String nombreCompleto, Rol rol) {
+        this.nombreCompleto = nombreCompleto;
+        this.rol = rol;
+    }
+
+    public void cambiarContrasenaHash(String nuevoHash) {
+        this.contrasenaHash = nuevoHash;
+    }
+
     public Integer getIdUsuario() {
         return idUsuario;
     }
