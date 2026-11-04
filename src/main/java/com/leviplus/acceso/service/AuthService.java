@@ -9,10 +9,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * RF-01. Carga el usuario con su rol para Spring Security, que compara la contrasena con el hash BCrypt.
- * Un usuario inactivo queda deshabilitado y no puede iniciar sesion (RF-20).
- */
 @Service
 public class AuthService implements UserDetailsService {
 

@@ -17,7 +17,6 @@ body {
     background: var(--fondo);
 }
 
-/* ---- Acceso y paginas de error ---- */
 .pagina-acceso {
     min-height: 100vh;
     display: flex;
@@ -64,7 +63,6 @@ button:hover { background: var(--verde-oscuro); }
 .mensaje.error { background: #fdecea; color: var(--error); }
 .mensaje.ok { background: #e6f4ea; color: var(--ok); }
 
-/* ---- Aplicacion con menu lateral ---- */
 .con-menu { display: flex; min-height: 100vh; }
 
 .menu {

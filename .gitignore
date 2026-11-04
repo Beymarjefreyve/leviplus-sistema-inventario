@@ -19,7 +19,7 @@ nbproject/
 .DS_Store
 Thumbs.db
 
-# Secretos y configuracion local: NUNCA subir al repositorio
+# Configuracion local
 .env
 *.env
 !.env.example
