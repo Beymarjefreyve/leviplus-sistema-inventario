@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Proveedores')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <div class="barra-titulo">
+        <h1>Proveedores</h1>
+        <a class="boton" th:href="@{/proveedores/nuevo}">Nuevo proveedor</a>
+    </div>
+
+    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
+    <p class="mensaje error" th:if="${error}" th:text="${error}"></p>
+
+    <table class="tabla">
+        <thead>
+        <tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${proveedores}">
+            <td th:text="${p.nombre}">Nombre</td>
+            <td th:text="${p.telefono}">Teléfono</td>
+            <td th:text="${p.correo} ?: '—'">Correo</td>
+            <td><span class="etiqueta" th:classappend="${p.estaActivo()} ? 'activo' : 'inactivo'"
+                      th:text="${p.estaActivo()} ? 'Activo' : 'Inactivo'">Activo</span></td>
+            <td class="acciones">
+                <a th:href="@{/proveedores/{id}/editar(id=${p.idProveedor})}">Editar</a>
+                <form th:if="${p.estaActivo()}" th:action="@{/proveedores/{id}/inactivar(id=${p.idProveedor})}" method="post"
+                      onsubmit="return confirm('¿Inactivar este proveedor?');">
+                    <button type="submit" class="peligro">Inactivar</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(proveedores)}"><td colspan="5">No hay proveedores registrados.</td></tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

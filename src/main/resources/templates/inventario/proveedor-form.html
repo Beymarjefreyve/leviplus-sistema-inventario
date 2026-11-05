@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera(${proveedorEditado == null} ? 'Nuevo proveedor' : 'Editar proveedor')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1 th:text="${proveedorEditado == null} ? 'Nuevo proveedor' : 'Editar proveedor'">Proveedor</h1>
+
+    <form class="formulario"
+          th:action="${proveedorEditado == null} ? @{/proveedores} : @{/proveedores/{id}(id=${proveedorEditado.idProveedor})}"
+          th:object="${proveedorForm}" method="post">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" th:field="*{nombre}" type="text" maxlength="120" autofocus>
+        <span class="campo-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" th:field="*{telefono}" type="text" maxlength="20">
+        <span class="campo-error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
+
+        <label for="correo">Correo (opcional)</label>
+        <input id="correo" th:field="*{correo}" type="email" maxlength="120">
+        <span class="campo-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></span>
+
+        <div class="botones">
+            <button type="submit">Guardar</button>
+            <a class="boton secundario" th:href="@{/proveedores}">Cancelar</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
