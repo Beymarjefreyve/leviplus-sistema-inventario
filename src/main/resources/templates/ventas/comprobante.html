@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: cabecera('Comprobante de venta')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <div class="barra-titulo">
+        <h1>Comprobante de venta N.º <span th:text="${venta.idVenta}">1</span></h1>
+        <div class="acciones-titulo">
+            <a class="boton" th:href="@{/ventas/nueva}">Nueva venta</a>
+        </div>
+    </div>
+
+    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
+    <p class="mensaje error" th:if="${error}" th:text="${error}"></p>
+
+    <p>Droguería Levi Plus · <span th:text="${#temporals.format(venta.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</span>
+        · Atendió: <span th:text="${venta.usuario.nombreCompleto}">Usuario</span></p>
+    <p>Estado: <span class="etiqueta" th:classappend="${venta.anulada} ? 'alerta' : 'activo'"
+                     th:text="${venta.anulada} ? 'Anulada' : 'Registrada'">Registrada</span></p>
+    <p th:if="${venta.anulada}">Anulada el
+        <span th:text="${#temporals.format(venta.fechaHoraAnulacion, 'dd/MM/yyyy HH:mm')}">fecha</span>
+        por <span th:text="${venta.usuarioAnula.nombreCompleto}">Admin</span>.
+        Motivo: <span th:text="${venta.motivoAnulacion}">motivo</span></p>
+
+    <table class="tabla">
+        <thead><tr><th>Producto</th><th>Presentación</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th>Lotes</th></tr></thead>
+        <tbody>
+        <tr th:each="d : ${venta.detalles}">
+            <td th:text="${d.producto.nombre}">Producto</td>
+            <td th:text="${d.producto.presentacion}">Presentación</td>
+            <td th:text="${d.cantidad}">1</td>
+            <td th:text="${#numbers.formatDecimal(d.precioUnitario, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+            <td th:text="${#numbers.formatDecimal(d.subtotal, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+            <td><span th:each="a, st : ${d.lotes}"
+                      th:text="|${a.lote.codigoLote} (${a.cantidad})${st.last ? '' : ', '}|">L1 (2)</span></td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr><th colspan="4">Total</th>
+            <th colspan="2" th:text="${#numbers.formatDecimal(venta.total, 1, 'POINT', 2, 'COMMA')}">0,00</th></tr>
+        </tfoot>
+    </table>
+</main>
+</body>
+</html>
