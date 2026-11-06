@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Nueva venta')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Nueva venta</h1>
+
+    <form class="formulario ancho" th:action="@{/ventas}" th:object="${ventaForm}" method="post">
+        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
+
+        <table class="tabla" id="lineas-venta">
+            <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
+            <tbody>
+            <tr class="linea" th:each="l, st : *{lineas}">
+                <td>
+                    <select th:name="|lineas[${st.index}].idProducto|">
+                        <option value="">— Selecciona un producto —</option>
+                        <option th:each="p : ${productos}" th:value="${p.idProducto}"
+                                th:selected="${p.idProducto == l.idProducto}"
+                                th:text="|${p.nombre} · ${p.presentacion} · ${p.codigo} · ${#numbers.formatDecimal(p.precio, 1, 'POINT', 2, 'COMMA')} · disp. ${p.existencia}|">Producto</option>
+                    </select>
+                </td>
+                <td><input type="number" min="1" th:name="|lineas[${st.index}].cantidad|" th:value="${l.cantidad}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <span class="campo-error" th:if="${#fields.hasErrors('lineas')}" th:errors="*{lineas}"></span>
+        <p class="campo-error" th:each="e : ${#fields.errors('lineas*')}" th:text="${e}"></p>
+
+        <button type="button" class="boton secundario" id="agregar-linea">Agregar otro producto</button>
+
+        <div class="botones">
+            <button type="submit">Confirmar venta</button>
+            <a class="boton secundario" th:href="@{/}">Cancelar</a>
+        </div>
+    </form>
+</main>
+<script th:src="@{/js/venta.js}"></script>
+</body>
+</html>
