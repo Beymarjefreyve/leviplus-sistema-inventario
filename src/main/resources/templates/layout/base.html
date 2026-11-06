@@ -13,6 +13,7 @@
     <nav>
         <a th:href="@{/}">Inicio</a>
         <a th:href="@{/ventas/nueva}">Nueva venta</a>
+        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/alertas}">Alertas</a>
         <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos}">Productos</a>
         <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/proveedores}">Proveedores</a>
         <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/finanzas}">Finanzas</a>

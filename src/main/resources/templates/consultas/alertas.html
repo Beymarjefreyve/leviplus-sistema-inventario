@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Alertas')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Alertas</h1>
+
+    <h2>Lotes próximos a vencer</h2>
+    <table class="tabla">
+        <thead><tr><th>Producto</th><th>Presentación</th><th>Lote</th><th>Vence</th><th>Cantidad</th><th>Estado</th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${porVencer}">
+            <td th:text="${a.producto}">Producto</td>
+            <td th:text="${a.presentacion}">Presentación</td>
+            <td th:text="${a.codigoLote}">L1</td>
+            <td th:text="${#temporals.format(a.fechaVencimiento, 'dd/MM/yyyy')}">fecha</td>
+            <td th:text="${a.cantidad}">0</td>
+            <td><span class="etiqueta alerta"
+                      th:text="${a.vencido()} ? 'Vencido hace ' + ${-a.diasRestantes} + ' días' : (${a.diasRestantes == 0} ? 'Vence hoy' : 'Vence en ' + ${a.diasRestantes} + ' días')">Vence</span></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(porVencer)}"><td colspan="6">No hay lotes próximos a vencer.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Productos en bajo stock</h2>
+    <table class="tabla">
+        <thead><tr><th>Código</th><th>Producto</th><th>Presentación</th><th>Existencia</th><th>Stock mínimo</th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${bajoStock}">
+            <td th:text="${a.codigo}">P-1</td>
+            <td th:text="${a.producto}">Producto</td>
+            <td th:text="${a.presentacion}">Presentación</td>
+            <td th:text="${a.existencia}">0</td>
+            <td th:text="${a.stockMinimo}">0</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(bajoStock)}"><td colspan="5">Ningún producto está por debajo de su stock mínimo.</td></tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
