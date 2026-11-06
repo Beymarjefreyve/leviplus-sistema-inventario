@@ -14,6 +14,7 @@
         <a th:href="@{/}">Inicio</a>
         <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos}">Productos</a>
         <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/proveedores}">Proveedores</a>
+        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/finanzas}">Finanzas</a>
         <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/usuarios}">Usuarios</a>
     </nav>
     <form th:action="@{/logout}" method="post" class="cerrar-sesion">

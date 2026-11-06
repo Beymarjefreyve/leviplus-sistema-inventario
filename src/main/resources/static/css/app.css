@@ -124,3 +124,5 @@ button.peligro:hover { background: #8c1d18; }
 .campo-error { display: block; color: var(--error); font-size: .85rem; margin-top: .2rem; }
 .ayuda { display: block; color: #5b6b6b; font-size: .82rem; margin-top: .2rem; }
 .resumen { background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: .7rem 1rem; margin: 1rem 0 0; }
+
+.acciones-titulo { display: flex; gap: .6rem; flex-wrap: wrap; }
