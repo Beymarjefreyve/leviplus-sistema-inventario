@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Finanzas')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <div class="barra-titulo">
+        <h1>Movimientos financieros</h1>
+        <div class="acciones-titulo">
+            <a class="boton" th:href="@{/finanzas/ingresos/nuevo}">Nuevo ingreso</a>
+            <a class="boton" th:href="@{/finanzas/egresos/nuevo}">Nuevo egreso</a>
+        </div>
+    </div>
+
+    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
+
+    <table class="tabla">
+        <thead>
+        <tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Proveedor</th><th>Valor</th><th>Registró</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="m : ${movimientos}">
+            <td th:text="${m.fecha}">2026-11-04</td>
+            <td><span class="etiqueta" th:classappend="${m.tipo.name() == 'INGRESO'} ? 'activo' : 'alerta'"
+                      th:text="${m.tipo.name() == 'INGRESO'} ? 'Ingreso' : 'Egreso'">Ingreso</span></td>
+            <td th:text="${m.concepto}">Concepto</td>
+            <td th:text="${m.proveedor != null} ? ${m.proveedor.nombre} : '—'">—</td>
+            <td th:text="${#numbers.formatDecimal(m.valor, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+            <td th:text="${m.usuario.nombreCompleto}">Usuario</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(movimientos)}"><td colspan="6">No hay movimientos registrados.</td></tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
