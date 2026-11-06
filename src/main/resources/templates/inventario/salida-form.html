@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Registrar salida')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Registrar salida</h1>
+    <p class="resumen">
+        <strong th:text="${producto.nombre}">Producto</strong> · <span th:text="${producto.presentacion}">Presentación</span><br>
+        Existencia actual: <strong th:text="${existencia}">0</strong>
+    </p>
+
+    <form class="formulario" th:action="@{/productos/{id}/salida(id=${producto.idProducto})}"
+          th:object="${salidaForm}" method="post">
+        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
+
+        <label for="idLote">Lote</label>
+        <select id="idLote" th:field="*{idLote}">
+            <option value="">Selecciona un lote</option>
+            <option th:each="l : ${lotes}" th:value="${l.idLote}"
+                    th:text="${l.codigoLote + ' · vence ' + l.fechaVencimiento + ' · ' + l.cantidadDisponible + ' disp.'}">Lote</option>
+        </select>
+        <span class="campo-error" th:if="${#fields.hasErrors('idLote')}" th:errors="*{idLote}"></span>
+
+        <label for="cantidad">Cantidad</label>
+        <input id="cantidad" th:field="*{cantidad}" type="number" step="1" min="1">
+        <span class="campo-error" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></span>
+
+        <label for="motivo">Motivo</label>
+        <select id="motivo" th:field="*{motivo}">
+            <option value="">Selecciona el motivo</option>
+            <option th:each="m : ${motivos}" th:value="${m.name()}" th:text="${m.etiqueta}">Motivo</option>
+        </select>
+        <span class="campo-error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></span>
+
+        <label for="observacion">Observación (opcional)</label>
+        <input id="observacion" th:field="*{observacion}" type="text" maxlength="200">
+        <span class="campo-error" th:if="${#fields.hasErrors('observacion')}" th:errors="*{observacion}"></span>
+
+        <div class="botones">
+            <button type="submit">Registrar salida</button>
+            <a class="boton secundario" th:href="@{/productos}">Cancelar</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
