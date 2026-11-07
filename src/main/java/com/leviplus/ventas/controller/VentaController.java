@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /** Registro de ventas (RF-08, RF-09). */
 @Controller
@@ -64,5 +66,18 @@ public class VentaController {
     public String comprobante(@PathVariable Integer id, Model modelo) {
         modelo.addAttribute("venta", servicio.obtener(id));
         return "ventas/comprobante";
+    }
+
+    @PostMapping("/{id}/anular")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String anular(@PathVariable Integer id, @RequestParam String motivo, Authentication autenticacion,
+                         RedirectAttributes aviso) {
+        try {
+            servicio.anular(id, motivo, autenticacion.getName());
+            aviso.addFlashAttribute("ok", "Venta anulada; los productos volvieron al inventario");
+        } catch (ReglaDeNegocioException e) {
+            aviso.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/ventas/" + id;
     }
 }
