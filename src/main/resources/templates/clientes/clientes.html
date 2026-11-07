@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Clientes frecuentes')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <div class="barra-titulo">
+        <h1>Clientes frecuentes</h1>
+        <div class="acciones-titulo"><a class="boton" th:href="@{/clientes/nuevo}">Nuevo cliente</a></div>
+    </div>
+
+    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
+
+    <table class="tabla">
+        <thead><tr><th>Nombre</th><th>Teléfono</th></tr></thead>
+        <tbody>
+        <tr th:each="c : ${clientes}">
+            <td th:text="${c.nombre}">Nombre</td>
+            <td th:text="${c.telefono}">3000000000</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="2">No hay clientes frecuentes registrados.</td></tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
