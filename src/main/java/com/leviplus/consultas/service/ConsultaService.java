@@ -29,6 +29,10 @@ public class ConsultaService {
                                   int stockMinimo) {
     }
 
+    public record Existencia(Integer idProducto, String codigo, String nombre, String presentacion,
+                             String laboratorio, long existencia, boolean activo) {
+    }
+
     private final LoteRepository lotes;
     private final ProductoRepository productos;
 
@@ -66,6 +70,18 @@ public class ConsultaService {
                 .filter(p -> existencia.getOrDefault(p.getIdProducto(), 0L) < p.getStockMinimo())
                 .map(p -> new AlertaBajoStock(p.getNombre(), p.getPresentacion(), p.getCodigoProducto(),
                         existencia.getOrDefault(p.getIdProducto(), 0L), p.getStockMinimo()))
+                .toList();
+    }
+
+    /** RF-18: existencia actual por nombre, presentación o código; sin texto lista todos los productos. */
+    @Transactional(readOnly = true)
+    public List<Existencia> buscarExistencia(String texto) {
+        String criterio = texto == null ? "" : texto.trim();
+        Map<Integer, Long> existencia = existencias();
+        List<Producto> encontrados = criterio.isEmpty() ? productos.findAllByOrderByNombreAsc() : productos.buscar(criterio);
+        return encontrados.stream()
+                .map(p -> new Existencia(p.getIdProducto(), p.getCodigoProducto(), p.getNombre(), p.getPresentacion(),
+                        p.getLaboratorio(), existencia.getOrDefault(p.getIdProducto(), 0L), p.estaActivo()))
                 .toList();
     }
 
