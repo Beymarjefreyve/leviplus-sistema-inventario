@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Nuevo cliente')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Nuevo cliente frecuente</h1>
+
+    <form class="formulario" th:action="@{/clientes}" th:object="${clienteForm}" method="post">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" th:field="*{nombre}" type="text" maxlength="100" autocomplete="off">
+        <span class="campo-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+
+        <label for="telefono">Teléfono de contacto</label>
+        <input id="telefono" th:field="*{telefono}" type="tel" maxlength="20" autocomplete="off">
+        <span class="campo-error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
+
+        <div class="botones">
+            <button type="submit">Guardar</button>
+            <a class="boton secundario" th:href="@{/clientes}">Cancelar</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
