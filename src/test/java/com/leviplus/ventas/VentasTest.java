@@ -210,6 +210,55 @@ class VentasTest {
                 .andExpect(content().string(not(containsString("Ibuprofeno"))));
     }
 
+    // ---- Anulación (RF-25)
+
+    @Test
+    void anularRestituyeElInventarioALosMismosLotes() {
+        Venta venta = servicio.registrar(form(acetaminofen.getIdProducto(), 8), "beto");
+
+        servicio.anular(venta.getIdVenta(), "Error de digitación", "ana");
+
+        assertThat(disponible(loteProximo)).isEqualTo(5);
+        assertThat(disponible(loteLejano)).isEqualTo(10);
+        Venta anulada = servicio.obtener(venta.getIdVenta());
+        assertThat(anulada.getEstado()).isEqualTo(EstadoVenta.ANULADA);
+        assertThat(anulada.getMotivoAnulacion()).isEqualTo("Error de digitación");
+        assertThat(anulada.getUsuarioAnula().getNombreUsuario()).isEqualTo("ana");
+    }
+
+    @Test
+    void noSePuedeAnularDosVecesNiSinMotivo() {
+        Venta venta = servicio.registrar(form(acetaminofen.getIdProducto(), 1), "beto");
+
+        assertThatThrownBy(() -> servicio.anular(venta.getIdVenta(), "  ", "ana"))
+                .isInstanceOf(ReglaDeNegocioException.class);
+        servicio.anular(venta.getIdVenta(), "Cliente se arrepintió", "ana");
+        assertThatThrownBy(() -> servicio.anular(venta.getIdVenta(), "otra vez", "ana"))
+                .isInstanceOf(ReglaDeNegocioException.class)
+                .hasMessageContaining("ya está anulada");
+        assertThat(disponible(loteProximo)).isEqualTo(5);
+    }
+
+    @Test
+    void encargadoNoPuedeAnular() throws Exception {
+        Venta venta = servicio.registrar(form(acetaminofen.getIdProducto(), 1), "beto");
+
+        mvc.perform(post("/ventas/" + venta.getIdVenta() + "/anular").with(user("beto").roles("ENCARGADO_DE_VENTAS"))
+                        .with(csrf()).param("motivo", "x"))
+                .andExpect(status().isForbidden());
+        assertThat(servicio.obtener(venta.getIdVenta()).getEstado()).isEqualTo(EstadoVenta.REGISTRADA);
+    }
+
+    @Test
+    void administradorAnulaDesdeElComprobante() throws Exception {
+        Venta venta = servicio.registrar(form(acetaminofen.getIdProducto(), 1), "beto");
+
+        mvc.perform(post("/ventas/" + venta.getIdVenta() + "/anular").with(user("ana").roles("ADMINISTRADOR"))
+                        .with(csrf()).param("motivo", "Devolución total"))
+                .andExpect(status().is3xxRedirection());
+        assertThat(servicio.obtener(venta.getIdVenta()).getEstado()).isEqualTo(EstadoVenta.ANULADA);
+    }
+
     @Test
     void sinSesionRedirigeAlLogin() throws Exception {
         mvc.perform(get("/ventas/nueva")).andExpect(status().is3xxRedirection());

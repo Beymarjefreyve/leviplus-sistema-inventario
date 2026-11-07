@@ -41,6 +41,13 @@
             <th colspan="2" th:text="${#numbers.formatDecimal(venta.total, 1, 'POINT', 2, 'COMMA')}">0,00</th></tr>
         </tfoot>
     </table>
+
+    <form sec:authorize="hasRole('ADMINISTRADOR')" th:if="${!venta.anulada}" class="formulario"
+          th:action="@{/ventas/{id}/anular(id=${venta.idVenta})}" method="post">
+        <label for="motivo">Anular esta venta (los productos vuelven al inventario)</label>
+        <input id="motivo" name="motivo" type="text" maxlength="200" required placeholder="Motivo de la anulación">
+        <div class="botones"><button type="submit">Anular venta</button></div>
+    </form>
 </main>
 </body>
 </html>

@@ -111,6 +111,30 @@ public class VentaService {
         return ventas.save(venta);
     }
 
+    /** RF-25: anula una venta registrada y devuelve al inventario los productos vendidos, a sus mismos lotes. */
+    @Transactional
+    public Venta anular(Integer idVenta, String motivo, String nombreUsuario) {
+        String motivoLimpio = motivo == null ? "" : motivo.trim();
+        if (motivoLimpio.isEmpty()) {
+            throw new ReglaDeNegocioException("Indica el motivo de la anulación");
+        }
+        if (motivoLimpio.length() > 200) {
+            throw new ReglaDeNegocioException("El motivo no puede superar 200 caracteres");
+        }
+        Venta venta = ventas.findById(idVenta).orElseThrow(() -> new ReglaDeNegocioException("La venta no existe"));
+        if (venta.isAnulada()) {
+            throw new ReglaDeNegocioException("La venta ya está anulada");
+        }
+        for (DetalleVenta detalle : venta.getDetalles()) {
+            for (DetalleVentaLote asignacion : detalle.getLotes()) {
+                Lote lote = lotes.buscarConBloqueo(asignacion.getLote().getIdLote()).orElseThrow();
+                lote.sumar(asignacion.getCantidad());
+            }
+        }
+        venta.anular(motivoLimpio, usuario(nombreUsuario));
+        return venta;
+    }
+
     /** Venta con su detalle y los lotes de los que salió (comprobante). */
     @Transactional(readOnly = true)
     public Venta obtener(Integer idVenta) {
