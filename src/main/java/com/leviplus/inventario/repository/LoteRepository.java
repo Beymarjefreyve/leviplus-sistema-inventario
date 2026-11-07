@@ -35,6 +35,10 @@ public interface LoteRepository extends JpaRepository<Lote, Integer> {
             + "and l.fechaVencimiento >= :hoy order by l.fechaVencimiento asc, l.idLote asc")
     List<Lote> vendiblesConBloqueo(@Param("producto") Producto producto, @Param("hoy") LocalDate hoy);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select l from Lote l where l.idLote = :id")
+    Optional<Lote> buscarConBloqueo(@Param("id") Integer id);
+
     /** Lotes con existencia, con su producto, para calcular las alertas de vencimiento. */
     @Query("select l from Lote l join fetch l.producto where l.cantidadDisponible > 0 order by l.fechaVencimiento asc, l.idLote asc")
     List<Lote> conExistencia();
