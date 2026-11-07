@@ -117,11 +117,37 @@ class ConsultasTest {
     }
 
     @Test
+    void existenciaSeBuscaPorNombrePresentacionOCodigo() {
+        lote(suero, "A", 100, 6);
+        lote(suero, "B", 100, 3);
+
+        assertThat(consultas.buscarExistencia("suero")).hasSize(1);
+        assertThat(consultas.buscarExistencia("suero").get(0).existencia()).isEqualTo(9);
+        assertThat(consultas.buscarExistencia("PAQUETE")).extracting("nombre").containsExactly("Gasas estériles");
+        assertThat(consultas.buscarExistencia("c-001")).extracting("nombre").containsExactly("Suero oral");
+        assertThat(consultas.buscarExistencia("inexistente")).isEmpty();
+        assertThat(consultas.buscarExistencia("")).hasSize(2);
+    }
+
+    @Test
     void alertasSoloParaAdministrador() throws Exception {
         mvc.perform(get("/alertas").with(user("ana").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk()).andExpect(view().name("consultas/alertas"));
         mvc.perform(get("/alertas").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void ambosRolesConsultanExistencias() throws Exception {
+        lote(suero, "A", 100, 6);
+        for (String rol : new String[]{"ADMINISTRADOR", "ENCARGADO_DE_VENTAS"}) {
+            mvc.perform(get("/existencias").param("q", "suero").with(user("x").roles(rol)))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("consultas/existencias"))
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("Suero oral")));
+        }
+        mvc.perform(get("/existencias").param("q", "zzz").with(user("ana").roles("ADMINISTRADOR")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("No se encontró")));
     }
 
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Existencias')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Consultar existencias</h1>
+
+    <form class="formulario ancho" th:action="@{/existencias}" method="get">
+        <label for="q">Nombre, presentación o código del producto</label>
+        <input id="q" name="q" type="text" maxlength="100" th:value="${q}" autofocus autocomplete="off">
+        <div class="botones"><button type="submit">Buscar</button></div>
+    </form>
+
+    <table class="tabla">
+        <thead><tr><th>Código</th><th>Producto</th><th>Presentación</th><th>Laboratorio</th><th>Existencia</th><th>Estado</th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${resultados}">
+            <td th:text="${r.codigo}">P-1</td>
+            <td th:text="${r.nombre}">Producto</td>
+            <td th:text="${r.presentacion}">Presentación</td>
+            <td th:text="${r.laboratorio}">Laboratorio</td>
+            <td th:text="${r.existencia}">0</td>
+            <td><span class="etiqueta" th:classappend="${r.activo} ? 'activo' : 'alerta'"
+                      th:text="${r.activo} ? 'Activo' : 'Inactivo'">Activo</span></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(resultados)}">
+            <td colspan="6" th:text="${#strings.isEmpty(q)} ? 'No hay productos registrados.' : 'No se encontró ningún producto con ese criterio.'">Sin resultados</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
