@@ -130,6 +130,42 @@ class ConsultasTest {
     }
 
     @Test
+    void panelCuentaLasVentasDelDiaSinLasAnuladas() {
+        lote(suero, "A", 100, 50);
+        VentaForm una = new VentaForm();
+        VentaForm.Linea linea = new VentaForm.Linea();
+        linea.setIdProducto(suero.getIdProducto());
+        linea.setCantidad(2);
+        una.getLineas().add(linea);
+        ventasServicio.registrar(una, "beto");
+        var anulada = ventasServicio.registrar(una, "beto");
+        ventasServicio.anular(anulada.getIdVenta(), "Prueba", "ana");
+
+        var panel = consultas.panel();
+
+        assertThat(panel.ventasHoy()).isEqualTo(1);
+        assertThat(panel.totalVentasHoy()).isEqualByComparingTo("6000.00");
+    }
+
+    @Test
+    void panelEmpiezaEnCeroSinVentas() {
+        var panel = consultas.panel();
+        assertThat(panel.ventasHoy()).isZero();
+        assertThat(panel.totalVentasHoy()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void administradorVeElPanelYElEncargadoNo() throws Exception {
+        mvc.perform(get("/").with(user("ana").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("panel"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Resumen del día")));
+        mvc.perform(get("/").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Resumen del día"))));
+    }
+
+    @Test
     void alertasSoloParaAdministrador() throws Exception {
         mvc.perform(get("/alertas").with(user("ana").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk()).andExpect(view().name("consultas/alertas"));
