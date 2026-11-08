@@ -6,6 +6,20 @@
 <main class="contenido">
     <h1>Bienvenido, <span th:text="${nombre}">Usuario</span></h1>
     <p>Rol: <strong th:text="${rol}">Administrador</strong></p>
+
+    <section th:if="${panel != null}">
+        <h2>Resumen del día</h2>
+        <table class="tabla">
+            <tbody>
+            <tr><th>Ventas registradas hoy</th><td th:text="${panel.ventasHoy}">0</td></tr>
+            <tr><th>Total vendido hoy</th><td th:text="${#numbers.formatDecimal(panel.totalVentasHoy, 1, 'POINT', 2, 'COMMA')}">0,00</td></tr>
+            <tr><th>Lotes próximos a vencer o vencidos</th>
+                <td><a th:href="@{/alertas}" th:text="${panel.lotesPorVencer}">0</a></td></tr>
+            <tr><th>Productos en bajo stock</th>
+                <td><a th:href="@{/alertas}" th:text="${panel.productosBajoStock}">0</a></td></tr>
+            </tbody>
+        </table>
+    </section>
 </main>
 </body>
 </html>
