@@ -8,6 +8,7 @@
         <h1>Comprobante de venta N.º <span th:text="${venta.idVenta}">1</span></h1>
         <div class="acciones-titulo">
             <a class="boton" th:href="@{/ventas/nueva}">Nueva venta</a>
+            <a class="boton secundario" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/ventas}">Historial</a>
         </div>
     </div>
 
