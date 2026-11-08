@@ -10,6 +10,7 @@ import com.leviplus.inventario.repository.ProductoRepository;
 import com.leviplus.ventas.controller.VentaForm;
 import com.leviplus.ventas.model.DetalleVenta;
 import com.leviplus.ventas.model.DetalleVentaLote;
+import com.leviplus.ventas.model.EstadoVenta;
 import com.leviplus.ventas.model.Venta;
 import com.leviplus.ventas.repository.VentaRepository;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,10 @@ public class VentaService {
     /** Producto disponible para vender, con su precio y la existencia vendible (lotes sin vencer). */
     public record ProductoVendible(Integer idProducto, String codigo, String nombre, String presentacion,
                                    BigDecimal precio, long existencia) {
+    }
+
+    /** Fila del ranking de productos más vendidos. */
+    public record ProductoVendido(String nombre, String presentacion, long unidades) {
     }
 
     private final VentaRepository ventas;
@@ -146,6 +151,32 @@ public class VentaService {
             }
         }
         return venta;
+    }
+
+    /** RF-10: historial de ventas entre dos fechas (ambas incluidas), con su estado. */
+    @Transactional(readOnly = true)
+    public List<Venta> historial(LocalDate desde, LocalDate hasta) {
+        validarRango(desde, hasta);
+        return ventas.entre(desde.atStartOfDay(), hasta.plusDays(1).atStartOfDay());
+    }
+
+    /** RF-11: productos más vendidos del periodo, sin ventas anuladas. */
+    @Transactional(readOnly = true)
+    public List<ProductoVendido> masVendidos(LocalDate desde, LocalDate hasta) {
+        validarRango(desde, hasta);
+        return ventas.masVendidos(EstadoVenta.REGISTRADA, desde.atStartOfDay(), hasta.plusDays(1).atStartOfDay())
+                .stream()
+                .map(f -> new ProductoVendido((String) f[0], (String) f[1], ((Number) f[2]).longValue()))
+                .toList();
+    }
+
+    private void validarRango(LocalDate desde, LocalDate hasta) {
+        if (desde == null || hasta == null) {
+            throw new ReglaDeNegocioException("Indica la fecha inicial y la final");
+        }
+        if (desde.isAfter(hasta)) {
+            throw new ReglaDeNegocioException("La fecha inicial no puede ser posterior a la final");
+        }
     }
 
     private Usuario usuario(String nombreUsuario) {
