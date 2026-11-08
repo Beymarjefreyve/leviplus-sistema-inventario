@@ -22,7 +22,7 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
     Optional<Venta> conUsuarios(@Param("id") Integer id);
 
     /** RF-11: unidades vendidas por producto en el periodo, sin contar ventas anuladas. */
-    @Query("select d.producto.nombre, d.producto.presentacion, sum(d.cantidad) from DetalleVenta d "
+    @Query("select d.producto.idProducto, d.producto.nombre, d.producto.presentacion, sum(d.cantidad) from DetalleVenta d "
             + "where d.venta.estado = :estado and d.venta.fechaHora >= :desde and d.venta.fechaHora < :hasta "
             + "group by d.producto.idProducto, d.producto.nombre, d.producto.presentacion "
             + "order by sum(d.cantidad) desc, d.producto.nombre asc")
