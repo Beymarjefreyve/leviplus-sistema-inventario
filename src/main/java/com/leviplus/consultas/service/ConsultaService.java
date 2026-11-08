@@ -4,9 +4,12 @@ import com.leviplus.inventario.model.Lote;
 import com.leviplus.inventario.model.Producto;
 import com.leviplus.inventario.repository.LoteRepository;
 import com.leviplus.inventario.repository.ProductoRepository;
+import com.leviplus.ventas.model.EstadoVenta;
+import com.leviplus.ventas.repository.VentaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -33,12 +36,17 @@ public class ConsultaService {
                              String laboratorio, long existencia, boolean activo) {
     }
 
+    public record Panel(long ventasHoy, BigDecimal totalVentasHoy, int lotesPorVencer, int productosBajoStock) {
+    }
+
     private final LoteRepository lotes;
     private final ProductoRepository productos;
+    private final VentaRepository ventas;
 
-    public ConsultaService(LoteRepository lotes, ProductoRepository productos) {
+    public ConsultaService(LoteRepository lotes, ProductoRepository productos, VentaRepository ventas) {
         this.lotes = lotes;
         this.productos = productos;
+        this.ventas = ventas;
     }
 
     /**
@@ -83,6 +91,16 @@ public class ConsultaService {
                 .map(p -> new Existencia(p.getIdProducto(), p.getCodigoProducto(), p.getNombre(), p.getPresentacion(),
                         p.getLaboratorio(), existencia.getOrDefault(p.getIdProducto(), 0L), p.estaActivo()))
                 .toList();
+    }
+
+    /** RF-15: indicadores del día (ventas registradas, sin las anuladas) y alertas vigentes. */
+    @Transactional(readOnly = true)
+    public Panel panel() {
+        LocalDate hoy = LocalDate.now();
+        Object[] fila = ventas.resumen(EstadoVenta.REGISTRADA, hoy.atStartOfDay(), hoy.plusDays(1).atStartOfDay()).get(0);
+        long cantidad = ((Number) fila[0]).longValue();
+        BigDecimal total = fila[1] == null ? BigDecimal.ZERO : (BigDecimal) fila[1];
+        return new Panel(cantidad, total, lotesPorVencer().size(), productosBajoStock().size());
     }
 
     private Map<Integer, Long> existencias() {
