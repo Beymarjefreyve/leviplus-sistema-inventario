@@ -17,7 +17,6 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
             + "order by v.fechaHora desc, v.idVenta desc")
     List<Venta> entre(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
-    /** Trae usuario y quien anula: las vistas se renderizan sin sesión de Hibernate. */
     @Query("select v from Venta v join fetch v.usuario left join fetch v.usuarioAnula where v.idVenta = :id")
     Optional<Venta> conUsuarios(@Param("id") Integer id);
 
@@ -28,4 +27,10 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
             + "order by sum(d.cantidad) desc, d.producto.nombre asc")
     List<Object[]> masVendidos(@Param("estado") EstadoVenta estado, @Param("desde") LocalDateTime desde,
                                @Param("hasta") LocalDateTime hasta);
+
+    /** Cantidad de ventas y suma de sus totales para el estado y el intervalo [desde, hasta). */
+    @Query("select count(v), sum(v.total) from Venta v where v.estado = :estado "
+            + "and v.fechaHora >= :desde and v.fechaHora < :hasta")
+    List<Object[]> resumen(@Param("estado") EstadoVenta estado, @Param("desde") LocalDateTime desde,
+                           @Param("hasta") LocalDateTime hasta);
 }
