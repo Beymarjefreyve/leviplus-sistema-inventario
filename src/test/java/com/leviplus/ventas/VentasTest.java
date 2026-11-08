@@ -239,10 +239,32 @@ class VentasTest {
         assertThat(disponible(loteProximo)).isEqualTo(5);
     }
 
+    // ---- Historial y más vendidos (RF-10, RF-11)
+
     @Test
-    void encargadoNoPuedeAnular() throws Exception {
+    void historialMuestraEstadoYMasVendidosIgnoraAnuladas() {
+        Venta uno = servicio.registrar(form(acetaminofen.getIdProducto(), 3), "beto");
+        Venta dos = servicio.registrar(form(ibuprofeno.getIdProducto(), 2), "beto");
+        servicio.anular(dos.getIdVenta(), "Prueba", "ana");
+
+        LocalDate hoy = LocalDate.now();
+        assertThat(servicio.historial(hoy, hoy)).extracting(Venta::getIdVenta)
+                .containsExactlyInAnyOrder(uno.getIdVenta(), dos.getIdVenta());
+        var ranking = servicio.masVendidos(hoy, hoy);
+        assertThat(ranking).hasSize(1);
+        assertThat(ranking.get(0).nombre()).isEqualTo("Acetaminofén");
+        assertThat(ranking.get(0).unidades()).isEqualTo(3);
+        assertThatThrownBy(() -> servicio.historial(hoy, hoy.minusDays(1))).isInstanceOf(ReglaDeNegocioException.class);
+    }
+
+    // ---- Permisos
+
+    @Test
+    void encargadoNoVeHistorialNiAnula() throws Exception {
         Venta venta = servicio.registrar(form(acetaminofen.getIdProducto(), 1), "beto");
 
+        mvc.perform(get("/ventas").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
+                .andExpect(status().isForbidden());
         mvc.perform(post("/ventas/" + venta.getIdVenta() + "/anular").with(user("beto").roles("ENCARGADO_DE_VENTAS"))
                         .with(csrf()).param("motivo", "x"))
                 .andExpect(status().isForbidden());
@@ -250,9 +272,12 @@ class VentasTest {
     }
 
     @Test
-    void administradorAnulaDesdeElComprobante() throws Exception {
+    void administradorVeHistorialYAnula() throws Exception {
         Venta venta = servicio.registrar(form(acetaminofen.getIdProducto(), 1), "beto");
 
+        mvc.perform(get("/ventas").with(user("ana").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("ventas/ventas"));
         mvc.perform(post("/ventas/" + venta.getIdVenta() + "/anular").with(user("ana").roles("ADMINISTRADOR"))
                         .with(csrf()).param("motivo", "Devolución total"))
                 .andExpect(status().is3xxRedirection());

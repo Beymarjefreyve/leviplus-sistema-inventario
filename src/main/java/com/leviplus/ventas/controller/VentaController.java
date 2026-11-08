@@ -4,6 +4,7 @@ import com.leviplus.common.ReglaDeNegocioException;
 import com.leviplus.ventas.model.Venta;
 import com.leviplus.ventas.service.VentaService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
 
 /** Registro de ventas (RF-08, RF-09). */
 @Controller
@@ -66,6 +69,26 @@ public class VentaController {
     public String comprobante(@PathVariable Integer id, Model modelo) {
         modelo.addAttribute("venta", servicio.obtener(id));
         return "ventas/comprobante";
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String historial(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                            Model modelo) {
+        LocalDate fin = hasta != null ? hasta : LocalDate.now();
+        LocalDate inicio = desde != null ? desde : fin.minusDays(30);
+        modelo.addAttribute("desde", inicio);
+        modelo.addAttribute("hasta", fin);
+        try {
+            modelo.addAttribute("ventas", servicio.historial(inicio, fin));
+            modelo.addAttribute("masVendidos", servicio.masVendidos(inicio, fin));
+        } catch (ReglaDeNegocioException e) {
+            modelo.addAttribute("error", e.getMessage());
+            modelo.addAttribute("ventas", java.util.List.of());
+            modelo.addAttribute("masVendidos", java.util.List.of());
+        }
+        return "ventas/ventas";
     }
 
     @PostMapping("/{id}/anular")

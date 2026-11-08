@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Historial de ventas')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <div class="barra-titulo">
+        <h1>Historial de ventas</h1>
+        <div class="acciones-titulo"><a class="boton" th:href="@{/ventas/nueva}">Nueva venta</a></div>
+    </div>
+
+    <form class="formulario ancho" th:action="@{/ventas}" method="get">
+        <label for="desde">Desde</label>
+        <input id="desde" name="desde" type="date" th:value="${desde}">
+        <label for="hasta">Hasta</label>
+        <input id="hasta" name="hasta" type="date" th:value="${hasta}">
+        <div class="botones"><button type="submit">Consultar</button></div>
+    </form>
+
+    <p class="mensaje error" th:if="${error}" th:text="${error}"></p>
+
+    <table class="tabla">
+        <thead><tr><th>N.º</th><th>Fecha</th><th>Atendió</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="v : ${ventas}">
+            <td th:text="${v.idVenta}">1</td>
+            <td th:text="${#temporals.format(v.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</td>
+            <td th:text="${v.usuario.nombreCompleto}">Usuario</td>
+            <td th:text="${#numbers.formatDecimal(v.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+            <td><span class="etiqueta" th:classappend="${v.anulada} ? 'alerta' : 'activo'"
+                      th:text="${v.anulada} ? 'Anulada' : 'Registrada'">Registrada</span></td>
+            <td><a th:href="@{/ventas/{id}(id=${v.idVenta})}">Ver</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(ventas)}"><td colspan="6">No hay ventas en el periodo seleccionado.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Productos más vendidos del periodo</h2>
+    <table class="tabla">
+        <thead><tr><th>Producto</th><th>Presentación</th><th>Unidades</th></tr></thead>
+        <tbody>
+        <tr th:each="p : ${masVendidos}">
+            <td th:text="${p.nombre}">Producto</td>
+            <td th:text="${p.presentacion}">Presentación</td>
+            <td th:text="${p.unidades}">0</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(masVendidos)}"><td colspan="3">Sin ventas registradas en el periodo.</td></tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
