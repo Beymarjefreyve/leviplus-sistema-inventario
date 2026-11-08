@@ -43,6 +43,27 @@
         </tfoot>
     </table>
 
+    <section th:if="${!#lists.isEmpty(devoluciones)}">
+        <h2>Devoluciones</h2>
+        <table class="tabla">
+            <thead><tr><th>Fecha</th><th>Producto</th><th>Cant.</th><th>Destino</th><th>Valor</th><th>Motivo</th></tr></thead>
+            <tbody th:each="dv : ${devoluciones}">
+            <tr th:each="r : ${dv.detalles}">
+                <td th:text="${#temporals.format(dv.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                <td th:text="${r.detalleVenta.producto.nombre}">Producto</td>
+                <td th:text="${r.cantidad}">1</td>
+                <td th:text="${r.destino.etiqueta}">Reintegrar</td>
+                <td th:text="${#numbers.formatDecimal(r.valor, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+                <td th:text="${dv.motivo}">motivo</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <p sec:authorize="hasRole('ADMINISTRADOR')" th:if="${!venta.anulada}">
+        <a class="boton secundario" th:href="@{/ventas/{id}/devolucion(id=${venta.idVenta})}">Registrar devolución</a>
+    </p>
+
     <form sec:authorize="hasRole('ADMINISTRADOR')" th:if="${!venta.anulada}" class="formulario"
           th:action="@{/ventas/{id}/anular(id=${venta.idVenta})}" method="post">
         <label for="motivo">Anular esta venta (los productos vuelven al inventario)</label>

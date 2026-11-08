@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Devolución')}"></head>
+<body class="con-menu">
+<aside th:replace="~{layout/base :: menu}"></aside>
+<main class="contenido">
+    <h1>Devolución de la venta N.º <span th:text="${venta.idVenta}">1</span></h1>
+
+    <form class="formulario ancho" th:action="@{/ventas/{id}/devoluciones(id=${venta.idVenta})}"
+          th:object="${devolucionForm}" method="post">
+        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
+
+        <table class="tabla">
+            <thead><tr><th>Producto</th><th>Vendidas</th><th>Se pueden devolver</th><th>Devolver</th><th>Destino</th></tr></thead>
+            <tbody>
+            <tr th:each="d, st : ${venta.detalles}">
+                <td th:text="|${d.producto.nombre} · ${d.producto.presentacion}|">Producto</td>
+                <td th:text="${d.cantidad}">1</td>
+                <td th:text="${devolvibles[d.idDetalleVenta]}">1</td>
+                <td>
+                    <input type="hidden" th:name="|lineas[${st.index}].idDetalleVenta|" th:value="${d.idDetalleVenta}">
+                    <input type="number" min="0" th:max="${devolvibles[d.idDetalleVenta]}"
+                           th:name="|lineas[${st.index}].cantidad|" th:value="${devolucionForm.lineas[st.index].cantidad}">
+                </td>
+                <td>
+                    <select th:name="|lineas[${st.index}].destino|">
+                        <option th:each="o : ${destinos}" th:value="${o.name()}" th:text="${o.etiqueta}"
+                                th:selected="${o == devolucionForm.lineas[st.index].destino}">Destino</option>
+                    </select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <label for="motivo">Motivo de la devolución</label>
+        <input id="motivo" th:field="*{motivo}" type="text" maxlength="200" required autocomplete="off">
+        <span class="campo-error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></span>
+
+        <div class="botones">
+            <button type="submit">Registrar devolución</button>
+            <a class="boton secundario" th:href="@{/ventas/{id}(id=${venta.idVenta})}">Cancelar</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

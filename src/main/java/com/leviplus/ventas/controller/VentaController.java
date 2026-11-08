@@ -1,6 +1,8 @@
 package com.leviplus.ventas.controller;
 
 import com.leviplus.common.ReglaDeNegocioException;
+import com.leviplus.ventas.model.DestinoDevolucion;
+import com.leviplus.ventas.model.DetalleVenta;
 import com.leviplus.ventas.model.Venta;
 import com.leviplus.ventas.service.VentaService;
 import jakarta.validation.Valid;
@@ -19,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 
-/** Registro de ventas (RF-08, RF-09). */
+/** Ventas (RF-08, RF-09), historial (RF-10, RF-11) y anulación (RF-25). */
 @Controller
 @RequestMapping("/ventas")
 public class VentaController {
@@ -68,7 +70,48 @@ public class VentaController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
     public String comprobante(@PathVariable Integer id, Model modelo) {
         modelo.addAttribute("venta", servicio.obtener(id));
+        modelo.addAttribute("devoluciones", servicio.devolucionesDe(id));
         return "ventas/comprobante";
+    }
+
+    /** RF-26: formulario de devolución de productos de una venta registrada. */
+    @GetMapping("/{id}/devolucion")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String nuevaDevolucion(@PathVariable Integer id, Model modelo) {
+        Venta venta = servicio.obtener(id);
+        DevolucionForm form = new DevolucionForm();
+        for (DetalleVenta detalle : venta.getDetalles()) {
+            DevolucionForm.Linea linea = new DevolucionForm.Linea();
+            linea.setIdDetalleVenta(detalle.getIdDetalleVenta());
+            form.getLineas().add(linea);
+        }
+        prepararDevolucion(modelo, venta);
+        modelo.addAttribute("devolucionForm", form);
+        return "ventas/devolucion-form";
+    }
+
+    @PostMapping("/{id}/devoluciones")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String registrarDevolucion(@PathVariable Integer id, @Valid DevolucionForm devolucionForm,
+                                      BindingResult errores, Authentication autenticacion, Model modelo,
+                                      RedirectAttributes aviso) {
+        if (!errores.hasErrors()) {
+            try {
+                servicio.registrarDevolucion(id, devolucionForm, autenticacion.getName());
+                aviso.addFlashAttribute("ok", "Devolución registrada correctamente");
+                return "redirect:/ventas/" + id;
+            } catch (ReglaDeNegocioException e) {
+                errores.reject("negocio", e.getMessage());
+            }
+        }
+        prepararDevolucion(modelo, servicio.obtener(id));
+        return "ventas/devolucion-form";
+    }
+
+    private void prepararDevolucion(Model modelo, Venta venta) {
+        modelo.addAttribute("venta", venta);
+        modelo.addAttribute("devolvibles", servicio.devolvibles(venta));
+        modelo.addAttribute("destinos", DestinoDevolucion.values());
     }
 
     @GetMapping
