@@ -1,26 +1,39 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Clientes frecuentes')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <div class="barra-titulo">
-        <h1>Clientes frecuentes</h1>
-        <div class="acciones-titulo"><a class="boton" th:href="@{/clientes/nuevo}">Nuevo cliente</a></div>
-    </div>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('clientes')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Ventas</span>
+            <h1>Clientes frecuentes</h1>
+            <p>Datos de contacto de los clientes habituales de la droguería.</p>
+        </div>
+        <div class="actions"><a class="btn" th:href="@{/clientes/nuevo}">Nuevo cliente</a></div>
+    </header>
 
-    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
 
-    <table class="tabla">
-        <thead><tr><th>Nombre</th><th>Teléfono</th></tr></thead>
-        <tbody>
-        <tr th:each="c : ${clientes}">
-            <td th:text="${c.nombre}">Nombre</td>
-            <td th:text="${c.telefono}">3000000000</td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="2">No hay clientes frecuentes registrados.</td></tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <div class="tools"><input type="search" data-filtra="tabla-clientes" placeholder="Buscar por nombre o teléfono" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+            <table id="tabla-clientes">
+                <thead><tr><th>Nombre</th><th>Teléfono de contacto</th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${clientes}">
+                    <td><b th:text="${c.nombre}">Nombre</b></td>
+                    <td th:text="${c.telefono}">3000000000</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="2" class="empty">No hay clientes frecuentes registrados.</td></tr>
+                <tr class="sin-resultados"><td colspan="2" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
+</div>
+<script th:src="@{/js/tabla.js}"></script>
 </body>
 </html>

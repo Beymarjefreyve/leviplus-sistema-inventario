@@ -1,36 +1,50 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Finanzas')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <div class="barra-titulo">
-        <h1>Movimientos financieros</h1>
-        <div class="acciones-titulo">
-            <a class="boton" th:href="@{/finanzas/ingresos/nuevo}">Nuevo ingreso</a>
-            <a class="boton" th:href="@{/finanzas/egresos/nuevo}">Nuevo egreso</a>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('finanzas')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Movimientos financieros</span>
+            <h1>Ingresos y egresos</h1>
+            <p>Las ventas se registran en el módulo de ventas y entran solas al balance. Aquí se registran los demás movimientos.</p>
         </div>
-    </div>
+        <div class="actions">
+            <a class="btn sec" th:href="@{/finanzas/ingresos/nuevo}">Nuevo ingreso</a>
+            <a class="btn" th:href="@{/finanzas/egresos/nuevo}">Nuevo egreso</a>
+        </div>
+    </header>
 
-    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
 
-    <table class="tabla">
-        <thead>
-        <tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Proveedor</th><th>Valor</th><th>Registró</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="m : ${movimientos}">
-            <td th:text="${m.fecha}">2026-11-04</td>
-            <td><span class="etiqueta" th:classappend="${m.tipo.name() == 'INGRESO'} ? 'activo' : 'alerta'"
-                      th:text="${m.tipo.name() == 'INGRESO'} ? 'Ingreso' : 'Egreso'">Ingreso</span></td>
-            <td th:text="${m.concepto}">Concepto</td>
-            <td th:text="${m.proveedor != null} ? ${m.proveedor.nombre} : '—'">—</td>
-            <td th:text="${#numbers.formatDecimal(m.valor, 1, 'POINT', 2, 'COMMA')}">0,00</td>
-            <td th:text="${m.usuario.nombreCompleto}">Usuario</td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(movimientos)}"><td colspan="6">No hay movimientos registrados.</td></tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <div class="card-h" style="padding:18px 22px 0"><h2>Movimientos recientes</h2></div>
+        <div class="tools"><input type="search" data-filtra="tabla-movimientos" placeholder="Buscar por concepto, proveedor, tipo o fecha" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+            <table id="tabla-movimientos">
+                <thead>
+                <tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Proveedor</th><th class="num">Valor</th><th>Registró</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${movimientos}">
+                    <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy')}">04/11/2026</td>
+                    <td><span class="pill" th:classappend="${m.tipo.name() == 'INGRESO'} ? '' : 'red'"
+                              th:text="${m.tipo.name() == 'INGRESO'} ? 'Ingreso' : 'Egreso'">Ingreso</span></td>
+                    <td th:text="${m.concepto}">Concepto</td>
+                    <td th:text="${m.proveedor != null} ? ${m.proveedor.nombre} : '—'">—</td>
+                    <td class="num" th:text="(${m.tipo.name() == 'INGRESO'} ? '' : '− ') + '$ ' + ${#numbers.formatDecimal(m.valor, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                    <td th:text="${m.usuario.nombreCompleto}">Usuario</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(movimientos)}"><td colspan="6" class="empty">No hay movimientos registrados.</td></tr>
+                <tr class="sin-resultados"><td colspan="6" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
+</div>
+<script th:src="@{/js/tabla.js}"></script>
 </body>
 </html>

@@ -139,6 +139,26 @@ class GestionUsuariosTest {
     }
 
     @Test
+    void activarDevuelveElAccesoAUnUsuarioDesactivado() throws Exception {
+        mvc.perform(post("/usuarios/{id}/desactivar", beto.getIdUsuario())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(redirectedUrl("/usuarios"));
+        mvc.perform(post("/usuarios/{id}/activar", beto.getIdUsuario())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(redirectedUrl("/usuarios"))
+                .andExpect(flash().attributeExists("ok"));
+        assertThat(usuarios.findById(beto.getIdUsuario()).orElseThrow().getEstado()).isEqualTo(EstadoRegistro.ACTIVO);
+        // Activar a quien ya está activo no cambia nada y avisa.
+        mvc.perform(post("/usuarios/{id}/activar", beto.getIdUsuario())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(flash().attributeExists("error"));
+        // El encargado de ventas no puede activar usuarios.
+        mvc.perform(post("/usuarios/{id}/activar", beto.getIdUsuario())
+                        .with(user("beto").roles("ENCARGADO_DE_VENTAS")).with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void nadiePuedeDesactivarseASiMismo() throws Exception {
         mvc.perform(post("/usuarios/{id}/desactivar", ana.getIdUsuario())
                         .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))

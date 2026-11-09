@@ -28,6 +28,21 @@ public class ProductoService {
         return productos.findAllByOrderByNombreAsc();
     }
 
+    /**
+     * Búsqueda para los listados: por nombre, presentación o código, con filtro de estado ("activos", "inactivos"
+     * o cualquier otro valor para todos). Devuelve a lo sumo {@code limite} filas para no cargar catálogos enormes.
+     */
+    @Transactional(readOnly = true)
+    public List<Producto> buscar(String texto, String estado, int limite) {
+        List<Producto> base = texto == null || texto.isBlank() ? productos.findAllByOrderByNombreAsc()
+                : productos.buscar(texto.trim());
+        return base.stream()
+                .filter(p -> "activos".equals(estado) ? p.estaActivo()
+                        : !"inactivos".equals(estado) || !p.estaActivo())
+                .limit(limite)
+                .toList();
+    }
+
     /** Existencia total (suma de los lotes) por id de producto; sin lotes equivale a cero. */
     @Transactional(readOnly = true)
     public Map<Integer, Long> existencias() {
@@ -77,6 +92,17 @@ public class ProductoService {
             throw new ReglaDeNegocioException("El producto ya está inactivo");
         }
         producto.inactivar();
+        productos.save(producto);
+    }
+
+    /** Vuelve a dejar disponible un producto inactivo; su historial y sus lotes no cambian. */
+    @Transactional
+    public void reactivar(Integer id) {
+        Producto producto = obtener(id);
+        if (producto.estaActivo()) {
+            throw new ReglaDeNegocioException("El producto ya está activo");
+        }
+        producto.reactivar();
         productos.save(producto);
     }
 }

@@ -82,6 +82,10 @@ public class Producto {
         this.estado = EstadoRegistro.INACTIVO;
     }
 
+    public void reactivar() {
+        this.estado = EstadoRegistro.ACTIVO;
+    }
+
     public Integer getIdProducto() {
         return idProducto;
     }

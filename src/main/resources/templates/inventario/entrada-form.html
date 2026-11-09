@@ -1,55 +1,81 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Registrar entrada')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Registrar entrada</h1>
-    <p class="resumen">
-        <strong th:text="${producto.nombre}">Producto</strong> · <span th:text="${producto.presentacion}">Presentación</span><br>
-        Existencia actual: <strong th:text="${existencia}">0</strong>
-    </p>
-
-    <form class="formulario" th:action="@{/productos/{id}/entrada(id=${producto.idProducto})}"
-          th:object="${entradaForm}" method="post">
-        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
-
-        <label for="idProveedor">Proveedor</label>
-        <select id="idProveedor" th:field="*{idProveedor}">
-            <option value="">Selecciona un proveedor</option>
-            <option th:each="p : ${proveedores}" th:value="${p.idProveedor}" th:text="${p.nombre}">Proveedor</option>
-        </select>
-        <span class="ayuda" th:if="${#lists.isEmpty(proveedores)}">No hay proveedores activos; registra uno primero.</span>
-        <span class="campo-error" th:if="${#fields.hasErrors('idProveedor')}" th:errors="*{idProveedor}"></span>
-
-        <label for="codigoLote">Lote</label>
-        <input id="codigoLote" th:field="*{codigoLote}" type="text" maxlength="40" autocomplete="off">
-        <span class="campo-error" th:if="${#fields.hasErrors('codigoLote')}" th:errors="*{codigoLote}"></span>
-
-        <label for="fechaVencimiento">Fecha de vencimiento</label>
-        <input id="fechaVencimiento" th:field="*{fechaVencimiento}" type="date">
-        <span class="campo-error" th:if="${#fields.hasErrors('fechaVencimiento')}" th:errors="*{fechaVencimiento}"></span>
-
-        <label for="cantidad">Cantidad recibida</label>
-        <input id="cantidad" th:field="*{cantidad}" type="number" step="1" min="1">
-        <span class="campo-error" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></span>
-
-        <div class="botones">
-            <button type="submit">Registrar entrada</button>
-            <a class="boton secundario" th:href="@{/productos}">Cancelar</a>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('movimientos')}"></aside>
+<main class="main">
+    <div th:replace="~{layout/base :: volver(@{/inventario}, 'Entradas y salidas')}"></div>
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Inventario</span>
+            <h1>Registrar entrada</h1>
+            <p>Cada entrada crea un lote con su fecha de vencimiento.</p>
         </div>
-    </form>
+    </header>
 
-    <table class="tabla" th:if="${!#lists.isEmpty(lotes)}">
-        <thead><tr><th>Lote</th><th>Vence</th><th>Disponible</th></tr></thead>
-        <tbody>
-        <tr th:each="l : ${lotes}">
-            <td th:text="${l.codigoLote}">L1</td>
-            <td th:text="${l.fechaVencimiento}">2027-01-01</td>
-            <td th:text="${l.cantidadDisponible}">0</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="grid2e">
+        <section class="card">
+            <div class="card-h">
+                <div class="pcell">
+                    <span class="avatar" style="background:#E6EEFA;color:#163F86" th:text="${#strings.toUpperCase(#strings.substring(producto.nombre, 0, 2))}">PR</span>
+                    <div><h2 style="margin:0" th:text="${producto.nombre}">Producto</h2><small th:text="${producto.presentacion}">Presentación</small></div>
+                </div>
+            </div>
+            <div class="line" style="flex-direction:row;justify-content:space-between;margin-bottom:14px">
+                <span class="sub">Existencia actual</span><b><span th:text="${existencia}">0</span> und</b>
+            </div>
+
+            <form class="fld" th:action="@{/productos/{id}/entrada(id=${producto.idProducto})}"
+                  th:object="${entradaForm}" method="post">
+                <div class="err" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+
+                <label>Proveedor
+                    <select id="idProveedor" th:field="*{idProveedor}">
+                        <option value="">Selecciona un proveedor</option>
+                        <option th:each="p : ${proveedores}" th:value="${p.idProveedor}" th:text="${p.nombre}">Proveedor</option>
+                    </select>
+                    <span class="ayuda" th:if="${#lists.isEmpty(proveedores)}">No hay proveedores activos; registra uno primero.</span>
+                    <span class="campo-error" th:if="${#fields.hasErrors('idProveedor')}" th:errors="*{idProveedor}"></span></label>
+
+                <div class="row2">
+                    <label>Lote
+                        <input id="codigoLote" th:field="*{codigoLote}" type="text" maxlength="40" autocomplete="off" placeholder="Ej. L-2611">
+                        <span class="campo-error" th:if="${#fields.hasErrors('codigoLote')}" th:errors="*{codigoLote}"></span></label>
+                    <label>Fecha de vencimiento
+                        <input id="fechaVencimiento" th:field="*{fechaVencimiento}" type="date">
+                        <span class="campo-error" th:if="${#fields.hasErrors('fechaVencimiento')}" th:errors="*{fechaVencimiento}"></span></label>
+                </div>
+
+                <label>Cantidad recibida
+                    <input id="cantidad" th:field="*{cantidad}" type="number" step="1" min="1">
+                    <span class="campo-error" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></span></label>
+
+                <div class="form-actions">
+                    <button class="btn" type="submit">Registrar entrada</button>
+                    <a class="btn sec" th:href="@{/inventario}">Cancelar</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="card flush">
+            <div class="card-h" style="padding:18px 22px 0"><h2>Lotes del producto</h2></div>
+            <div class="tw">
+                <table>
+                    <thead><tr><th>Lote</th><th>Vence</th><th class="num">Disponible</th></tr></thead>
+                    <tbody>
+                    <tr th:each="l : ${lotes}">
+                        <td th:text="${l.codigoLote}">L1</td>
+                        <td th:text="${#temporals.format(l.fechaVencimiento, 'dd/MM/yyyy')}">2027-01-01</td>
+                        <td class="num" th:text="${l.cantidadDisponible}">0</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(lotes)}"><td colspan="3" class="empty">Aún no hay lotes con existencia.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 </main>
+</div>
 </body>
 </html>

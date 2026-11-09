@@ -1,50 +1,89 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Productos')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <div class="barra-titulo">
-        <h1>Inventario de productos</h1>
-        <a class="boton" th:href="@{/productos/nuevo}">Nuevo producto</a>
-    </div>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('productos')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Inventario</span>
+            <h1>Productos</h1>
+            <p>Catálogo de la droguería. Aquí se crean y editan los productos; las entradas y salidas de existencia se registran en
+                <a th:href="@{/inventario}">Entradas y salidas</a>.</p>
+        </div>
+        <div class="actions">
+            <a class="btn sec" th:href="@{/inventario}">Entradas y salidas</a>
+            <a class="btn" th:href="@{/productos/nuevo}">Nuevo producto</a>
+        </div>
+    </header>
 
-    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
-    <p class="mensaje error" th:if="${error}" th:text="${error}"></p>
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
 
-    <table class="tabla">
-        <thead>
-        <tr>
-            <th>Código</th><th>Nombre</th><th>Presentación</th><th>Laboratorio</th>
-            <th>Precio</th><th>Existencia</th><th>Estado</th><th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${productos}" th:with="existencia=${existencias.getOrDefault(p.idProducto, 0L)}">
-            <td th:text="${p.codigoProducto}">COD</td>
-            <td th:text="${p.nombre}">Nombre</td>
-            <td th:text="${p.presentacion}">Presentación</td>
-            <td th:text="${p.laboratorio}">Laboratorio</td>
-            <td th:text="${#numbers.formatDecimal(p.precioVenta, 1, 'POINT', 2, 'COMMA')}">0,00</td>
-            <td>
-                <span th:text="${existencia}">0</span>
-                <span class="etiqueta alerta" th:if="${p.estaActivo() and existencia <= p.stockMinimo}">Bajo stock</span>
-            </td>
-            <td><span class="etiqueta" th:classappend="${p.estaActivo()} ? 'activo' : 'inactivo'"
-                      th:text="${p.estaActivo()} ? 'Activo' : 'Inactivo'">Activo</span></td>
-            <td class="acciones">
-                <a th:href="@{/productos/{id}/editar(id=${p.idProducto})}">Editar</a>
-                <a th:if="${p.estaActivo()}" th:href="@{/productos/{id}/entrada(id=${p.idProducto})}">Entrada</a>
-                <a th:if="${existencia > 0}" th:href="@{/productos/{id}/salida(id=${p.idProducto})}">Salida</a>
-                <form th:if="${p.estaActivo()}" th:action="@{/productos/{id}/inactivar(id=${p.idProducto})}" method="post"
-                      onsubmit="return confirm('¿Inactivar este producto? Dejará de estar disponible en nuevas entradas y ventas.');">
-                    <button type="submit" class="peligro">Inactivar</button>
-                </form>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(productos)}"><td colspan="8">No hay productos registrados.</td></tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <form class="search" th:action="@{/productos}" method="get">
+            <label>Buscar producto
+                <input type="search" name="q" th:value="${q}" maxlength="100" autocomplete="off" autofocus
+                       placeholder="Nombre, presentación o código"></label>
+            <label style="flex:0 0 180px;min-width:150px">Estado
+                <select name="estado">
+                    <option value="todos" th:selected="${estado == 'todos'}">Todos</option>
+                    <option value="activos" th:selected="${estado == 'activos'}">Activos</option>
+                    <option value="inactivos" th:selected="${estado == 'inactivos'}">Inactivos</option>
+                </select></label>
+            <button class="btn" type="submit">Buscar</button>
+            <a class="btn sec" th:if="${!#strings.isEmpty(q) or estado != 'todos'}" th:href="@{/productos}">Limpiar</a>
+        </form>
+
+        <div class="tw">
+            <table>
+                <thead>
+                <tr>
+                    <th>Código</th><th>Producto</th><th>Laboratorio</th>
+                    <th class="num">Precio</th><th>Existencia</th><th>Estado</th><th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${productos}" th:with="existencia=${existencias.getOrDefault(p.idProducto, 0L)}">
+                    <td th:text="${p.codigoProducto}">COD</td>
+                    <td><div class="pcell">
+                        <span class="avatar" style="background:#E6EEFA;color:#163F86" th:text="${#strings.toUpperCase(#strings.substring(p.nombre, 0, 2))}">PR</span>
+                        <div><b th:text="${p.nombre}">Nombre</b><small th:text="${p.presentacion}">Presentación</small></div>
+                    </div></td>
+                    <td th:text="${p.laboratorio}">Laboratorio</td>
+                    <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(p.precioVenta, 1, 'POINT', 0, 'COMMA')}">0</td>
+                    <td>
+                        <b th:text="${existencia} + ' und'">0</b>
+                        <span class="pill warn" th:if="${p.estaActivo() and existencia <= p.stockMinimo}">Bajo stock</span>
+                    </td>
+                    <td><span class="pill" th:classappend="${p.estaActivo()} ? '' : 'gray'"
+                              th:text="${p.estaActivo()} ? 'Activo' : 'Inactivo'">Activo</span></td>
+                    <td>
+                        <div class="acc">
+                            <a class="btn sm edit" th:href="@{/productos/{id}/editar(id=${p.idProducto})}">Editar</a>
+                            <span class="sep" aria-hidden="true"></span>
+                            <form th:if="${p.estaActivo()}" th:action="@{/productos/{id}/inactivar(id=${p.idProducto})}" method="post"
+                                  onsubmit="return confirm('¿Inactivar este producto? Dejará de estar disponible en nuevas entradas y ventas.');">
+                                <button type="submit" class="btn sm off">Inactivar</button>
+                            </form>
+                            <form th:unless="${p.estaActivo()}" th:action="@{/productos/{id}/reactivar(id=${p.idProducto})}" method="post"
+                                  onsubmit="return confirm('¿Reactivar este producto? Volverá a estar disponible en entradas y ventas.');">
+                                <button type="submit" class="btn sm on">Reactivar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(productos)}"><td colspan="7" class="empty">No se encontraron productos con ese criterio.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="foot">
+            Mostrando <span th:text="${#lists.size(productos)}">0</span> de <span th:text="${total}">0</span> productos registrados
+            <span th:if="${#lists.size(productos) >= limite}"> · se muestran los primeros <span th:text="${limite}">100</span>; usa el buscador para afinar</span>
+        </div>
+    </section>
 </main>
+</div>
 </body>
 </html>

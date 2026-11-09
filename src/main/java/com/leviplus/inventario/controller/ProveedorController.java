@@ -89,4 +89,16 @@ public class ProveedorController {
         }
         return "redirect:/proveedores";
     }
+
+    @PostMapping("/{id}/reactivar")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String reactivar(@PathVariable Integer id, RedirectAttributes aviso) {
+        try {
+            servicio.reactivar(id);
+            aviso.addFlashAttribute("ok", "Proveedor reactivado");
+        } catch (ReglaDeNegocioException e) {
+            aviso.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/proveedores";
+    }
 }

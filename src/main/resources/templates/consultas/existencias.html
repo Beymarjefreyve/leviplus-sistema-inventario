@@ -1,34 +1,50 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Existencias')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Consultar existencias</h1>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('existencias')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Consultas</span>
+            <h1>Consultar existencias</h1>
+            <p>Busque un producto por nombre, presentación o código para ver cuántas unidades hay.</p>
+        </div>
+    </header>
 
-    <form class="formulario ancho" th:action="@{/existencias}" method="get">
-        <label for="q">Nombre, presentación o código del producto</label>
-        <input id="q" name="q" type="text" maxlength="100" th:value="${q}" autofocus autocomplete="off">
-        <div class="botones"><button type="submit">Buscar</button></div>
-    </form>
+    <section class="card">
+        <form th:action="@{/existencias}" method="get" class="filters">
+            <label class="grow">Nombre, presentación o código del producto
+                <input id="q" name="q" type="search" maxlength="100" th:value="${q}" autofocus autocomplete="off" placeholder="Ej. Acetaminofén"></label>
+            <button class="btn" type="submit">Buscar</button>
+        </form>
+    </section>
 
-    <table class="tabla">
-        <thead><tr><th>Código</th><th>Producto</th><th>Presentación</th><th>Laboratorio</th><th>Existencia</th><th>Estado</th></tr></thead>
-        <tbody>
-        <tr th:each="r : ${resultados}">
-            <td th:text="${r.codigo}">P-1</td>
-            <td th:text="${r.nombre}">Producto</td>
-            <td th:text="${r.presentacion}">Presentación</td>
-            <td th:text="${r.laboratorio}">Laboratorio</td>
-            <td th:text="${r.existencia}">0</td>
-            <td><span class="etiqueta" th:classappend="${r.activo} ? 'activo' : 'alerta'"
-                      th:text="${r.activo} ? 'Activo' : 'Inactivo'">Activo</span></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(resultados)}">
-            <td colspan="6" th:text="${#strings.isEmpty(q)} ? 'No hay productos registrados.' : 'No se encontró ningún producto con ese criterio.'">Sin resultados</td>
-        </tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <div class="tw">
+            <table>
+                <thead><tr><th>Código</th><th>Producto</th><th>Laboratorio</th><th class="num">Existencia</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${resultados}">
+                    <td th:text="${r.codigo}">P-1</td>
+                    <td><div class="pcell">
+                        <span class="avatar" style="background:#E6EEFA;color:#163F86" th:text="${#strings.toUpperCase(#strings.substring(r.nombre, 0, 2))}">PR</span>
+                        <div><b th:text="${r.nombre}">Producto</b><small th:text="${r.presentacion}">Presentación</small></div>
+                    </div></td>
+                    <td th:text="${r.laboratorio}">Laboratorio</td>
+                    <td class="num"><b th:text="${r.existencia} + ' und'">0</b></td>
+                    <td><span class="pill" th:classappend="${r.activo} ? '' : 'gray'"
+                              th:text="${r.activo} ? 'Activo' : 'Inactivo'">Activo</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(resultados)}">
+                    <td colspan="5" class="empty" th:text="${#strings.isEmpty(q)} ? 'No hay productos registrados.' : 'No se encontró ningún producto con ese criterio.'">Sin resultados</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
+</div>
 </body>
 </html>

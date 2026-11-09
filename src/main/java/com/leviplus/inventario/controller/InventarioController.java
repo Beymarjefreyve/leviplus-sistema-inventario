@@ -49,7 +49,7 @@ public class InventarioController {
             try {
                 inventario.registrarEntrada(id, entradaForm, autenticacion.getName());
                 aviso.addFlashAttribute("ok", "Entrada registrada; la existencia del producto se actualizó");
-                return "redirect:/productos";
+                return "redirect:/inventario";
             } catch (ReglaDeNegocioException e) {
                 errores.reject("negocio", e.getMessage());
             }
@@ -74,7 +74,7 @@ public class InventarioController {
             try {
                 inventario.registrarSalida(id, salidaForm, autenticacion.getName());
                 aviso.addFlashAttribute("ok", "Salida registrada; la existencia del lote se actualizó");
-                return "redirect:/productos";
+                return "redirect:/inventario";
             } catch (ReglaDeNegocioException e) {
                 errores.reject("negocio", e.getMessage());
             }
