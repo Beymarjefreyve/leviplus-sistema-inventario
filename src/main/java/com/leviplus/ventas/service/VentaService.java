@@ -58,13 +58,39 @@ public class VentaService {
     /** Productos activos con existencia vendible, para el formulario de venta. */
     @Transactional(readOnly = true)
     public List<ProductoVendible> productosVendibles() {
+        return vendibles(productos.findAllByOrderByNombreAsc(), Integer.MAX_VALUE);
+    }
+
+    /**
+     * Buscador del formulario de venta: productos activos con existencia vendible cuyo nombre, presentación o
+     * código contiene el texto. Devuelve a lo sumo {@code limite} resultados.
+     */
+    @Transactional(readOnly = true)
+    public List<ProductoVendible> buscarVendibles(String texto, int limite) {
+        List<Producto> base = texto == null || texto.isBlank() ? productos.findAllByOrderByNombreAsc()
+                : productos.buscar(texto.trim());
+        return vendibles(base, limite);
+    }
+
+    /** Datos de venta de los productos indicados (para reconstruir el carrito tras un error del formulario). */
+    @Transactional(readOnly = true)
+    public Map<Integer, ProductoVendible> vendiblesPorIds(java.util.Collection<Integer> ids) {
+        Map<Integer, ProductoVendible> resultado = new HashMap<>();
+        for (ProductoVendible p : vendibles(productos.findAllById(ids), Integer.MAX_VALUE)) {
+            resultado.put(p.idProducto(), p);
+        }
+        return resultado;
+    }
+
+    private List<ProductoVendible> vendibles(List<Producto> candidatos, int limite) {
         Map<Integer, Long> existencia = new HashMap<>();
         for (Object[] fila : lotes.existenciaVendiblePorProducto(LocalDate.now())) {
             existencia.put((Integer) fila[0], ((Number) fila[1]).longValue());
         }
-        return productos.findAllByOrderByNombreAsc().stream()
+        return candidatos.stream()
                 .filter(Producto::estaActivo)
                 .filter(p -> existencia.getOrDefault(p.getIdProducto(), 0L) > 0)
+                .limit(limite)
                 .map(p -> new ProductoVendible(p.getIdProducto(), p.getCodigoProducto(), p.getNombre(),
                         p.getPresentacion(), p.getPrecioVenta(), existencia.get(p.getIdProducto())))
                 .toList();

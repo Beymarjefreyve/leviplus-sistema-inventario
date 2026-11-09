@@ -198,15 +198,23 @@ class VentasTest {
     }
 
     @Test
-    void formularioDeVentaMuestraSoloProductosConExistencia() throws Exception {
+    void buscadorDeVentaDevuelveSoloProductosActivosConExistencia() throws Exception {
         mvc.perform(get("/ventas/nueva").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
                 .andExpect(status().isOk())
-                .andExpect(view().name("ventas/venta-form"))
+                .andExpect(view().name("ventas/venta-form"));
+        // Sin texto: lista los productos con existencia, con su precio y existencia.
+        mvc.perform(get("/ventas/productos").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
+                .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Acetaminofén")))
                 .andExpect(content().string(containsString("Ibuprofeno")));
+        // Con texto: filtra por nombre.
+        mvc.perform(get("/ventas/productos").param("q", "acetamin").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
+                .andExpect(content().string(containsString("Acetaminofén")))
+                .andExpect(content().string(not(containsString("Ibuprofeno"))));
+        // Un producto inactivo deja de aparecer.
         ibuprofeno.inactivar();
         productos.save(ibuprofeno);
-        mvc.perform(get("/ventas/nueva").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
+        mvc.perform(get("/ventas/productos").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
                 .andExpect(content().string(not(containsString("Ibuprofeno"))));
     }
 

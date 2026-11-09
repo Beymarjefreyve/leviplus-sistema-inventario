@@ -1,46 +1,59 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Devolución')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Devolución de la venta N.º <span th:text="${venta.idVenta}">1</span></h1>
-
-    <form class="formulario ancho" th:action="@{/ventas/{id}/devoluciones(id=${venta.idVenta})}"
-          th:object="${devolucionForm}" method="post">
-        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
-
-        <table class="tabla">
-            <thead><tr><th>Producto</th><th>Vendidas</th><th>Se pueden devolver</th><th>Devolver</th><th>Destino</th></tr></thead>
-            <tbody>
-            <tr th:each="d, st : ${venta.detalles}">
-                <td th:text="|${d.producto.nombre} · ${d.producto.presentacion}|">Producto</td>
-                <td th:text="${d.cantidad}">1</td>
-                <td th:text="${devolvibles[d.idDetalleVenta]}">1</td>
-                <td>
-                    <input type="hidden" th:name="|lineas[${st.index}].idDetalleVenta|" th:value="${d.idDetalleVenta}">
-                    <input type="number" min="0" th:max="${devolvibles[d.idDetalleVenta]}"
-                           th:name="|lineas[${st.index}].cantidad|" th:value="${devolucionForm.lineas[st.index].cantidad}">
-                </td>
-                <td>
-                    <select th:name="|lineas[${st.index}].destino|">
-                        <option th:each="o : ${destinos}" th:value="${o.name()}" th:text="${o.etiqueta}"
-                                th:selected="${o == devolucionForm.lineas[st.index].destino}">Destino</option>
-                    </select>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <label for="motivo">Motivo de la devolución</label>
-        <input id="motivo" th:field="*{motivo}" type="text" maxlength="200" required autocomplete="off">
-        <span class="campo-error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></span>
-
-        <div class="botones">
-            <button type="submit">Registrar devolución</button>
-            <a class="boton secundario" th:href="@{/ventas/{id}(id=${venta.idVenta})}">Cancelar</a>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('historial')}"></aside>
+<main class="main">
+    <div th:replace="~{layout/base :: volver(@{/ventas/{id}(id=${venta.idVenta})}, 'la venta')}"></div>
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Ventas</span>
+            <h1>Registrar devolución · Venta V-<span th:text="${venta.idVenta}">1</span></h1>
+            <p>Se permiten devoluciones parciales y sucesivas. Cada producto puede reintegrarse al inventario o darse de baja.</p>
         </div>
+    </header>
+
+    <form th:action="@{/ventas/{id}/devoluciones(id=${venta.idVenta})}" th:object="${devolucionForm}" method="post">
+        <div class="err" style="margin-bottom:16px" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+
+        <section class="card flush">
+            <div class="tw">
+                <table>
+                    <thead><tr><th>Producto</th><th class="num">Vendidas</th><th class="num">Se pueden devolver</th><th style="width:130px">Devolver</th><th>Destino</th></tr></thead>
+                    <tbody>
+                    <tr th:each="d, st : ${venta.detalles}">
+                        <td><b th:text="${d.producto.nombre}">Producto</b><br><small class="sub" th:text="${d.producto.presentacion}">Presentación</small></td>
+                        <td class="num" th:text="${d.cantidad}">1</td>
+                        <td class="num" th:text="${devolvibles[d.idDetalleVenta]}">1</td>
+                        <td>
+                            <input type="hidden" th:name="|lineas[${st.index}].idDetalleVenta|" th:value="${d.idDetalleVenta}">
+                            <input type="number" min="0" th:max="${devolvibles[d.idDetalleVenta]}"
+                                   th:name="|lineas[${st.index}].cantidad|" th:value="${devolucionForm.lineas[st.index].cantidad}">
+                        </td>
+                        <td>
+                            <select th:name="|lineas[${st.index}].destino|">
+                                <option th:each="o : ${destinos}" th:value="${o.name()}" th:text="${o.etiqueta}"
+                                        th:selected="${o == devolucionForm.lineas[st.index].destino}">Destino</option>
+                            </select>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card form">
+            <label>Motivo de la devolución
+                <input id="motivo" th:field="*{motivo}" type="text" maxlength="200" required autocomplete="off">
+                <span class="campo-error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></span></label>
+            <div class="form-actions">
+                <button class="btn" type="submit">Registrar devolución</button>
+                <a class="btn sec" th:href="@{/ventas/{id}(id=${venta.idVenta})}">Cancelar</a>
+            </div>
+        </section>
     </form>
 </main>
+</div>
 </body>
 </html>
