@@ -3,29 +3,98 @@
 <head th:fragment="cabecera(titulo)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${titulo} + ' · Levi Plus'">Levi Plus</title>
+    <title th:text="${titulo} + ' · Droguería Levi Plus'">Levi Plus</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 
-<aside th:fragment="menu" class="menu">
-    <div class="marca">Levi Plus</div>
-    <nav>
-        <a th:href="@{/}">Inicio</a>
-        <a th:href="@{/ventas/nueva}">Nueva venta</a>
-        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/ventas}">Ventas</a>
-        <a th:href="@{/clientes}">Clientes frecuentes</a>
-        <a th:href="@{/existencias}">Existencias</a>
-        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/alertas}">Alertas</a>
-        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos}">Productos</a>
-        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/proveedores}">Proveedores</a>
-        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/finanzas}">Finanzas</a>
-        <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/usuarios}">Usuarios</a>
+<!-- Menú lateral. El parámetro "activo" resalta la sección actual. -->
+<aside th:fragment="menu(activo)" class="side">
+    <div class="brand">
+        <div class="logo"><img th:src="@{/img/logo.svg}" alt=""></div>
+        <div><b>Levi Plus</b><small>Droguería</small></div>
+    </div>
+
+    <nav class="nav" aria-label="Menú principal">
+        <div class="nav-g">
+            <span>General</span>
+            <a th:href="@{/}" th:classappend="${activo == 'inicio'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>
+                <span>Inicio</span></a>
+        </div>
+
+        <div class="nav-g">
+            <span>Inventario</span>
+            <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/productos}" th:classappend="${activo == 'productos'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5zM3.3 7.5L12 12.5l8.7-5M12 12.5V21"/></svg>
+                <span>Productos</span></a>
+            <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/inventario}" th:classappend="${activo == 'movimientos'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg>
+                <span>Entradas y salidas</span></a>
+            <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/proveedores}" th:classappend="${activo == 'proveedores'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h12v10H2zM14 10h4l4 3v3h-8zM6 19a2 2 0 100-4 2 2 0 000 4zM17 19a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                <span>Proveedores</span></a>
+            <a th:href="@{/existencias}" th:classappend="${activo == 'existencias'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+                <span>Consultar existencias</span></a>
+        </div>
+
+        <div class="nav-g">
+            <span>Ventas</span>
+            <a th:href="@{/ventas/nueva}" th:classappend="${activo == 'venta'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 001 .8h9.6a1 1 0 001-.8L21 7H6"/></svg>
+                <span>Registrar venta</span></a>
+            <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/ventas}" th:classappend="${activo == 'historial'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+                <span>Historial de ventas</span></a>
+            <a th:href="@{/clientes}" th:classappend="${activo == 'clientes'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 5.6a5.2 5.2 0 00-7.4 0L12 7l-1.4-1.4a5.2 5.2 0 00-7.4 7.4L12 21.8l8.8-8.8a5.2 5.2 0 000-7.4z"/></svg>
+                <span>Clientes frecuentes</span></a>
+        </div>
+
+        <div class="nav-g" sec:authorize="hasRole('ADMINISTRADOR')">
+            <span>Finanzas</span>
+            <a th:href="@{/finanzas}" th:classappend="${activo == 'finanzas'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 6.5C16 5 14 4.5 12 4.5c-2.6 0-4.5 1.2-4.5 3.2 0 5 9.5 2.3 9.5 7.3 0 2-2 3.5-5 3.5-2.2 0-4.2-.7-5-2.5"/></svg>
+                <span>Ingresos y egresos</span></a>
+        </div>
+
+        <div class="nav-g" sec:authorize="hasRole('ADMINISTRADOR')">
+            <span>Seguimiento</span>
+            <a th:href="@{/alertas}" th:classappend="${activo == 'alertas'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 16V11a6 6 0 10-12 0v5l-2 2h16zM10 21h4"/></svg>
+                <span>Alertas</span></a>
+        </div>
+
+        <div class="nav-g" sec:authorize="hasRole('ADMINISTRADOR')">
+            <span>Administración</span>
+            <a th:href="@{/usuarios}" th:classappend="${activo == 'usuarios'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.5a3.5 3.5 0 010 7M18 14.5c2.2.7 3.5 2.6 3.5 5.5"/></svg>
+                <span>Usuarios</span></a>
+        </div>
     </nav>
-    <form th:action="@{/logout}" method="post" class="cerrar-sesion">
-        <button type="submit">Cerrar sesión</button>
-    </form>
+
+    <div class="who">
+        <span class="av" th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">A</span>
+        <div>
+            <b th:text="${#authentication.name}">usuario</b>
+            <small sec:authorize="hasRole('ADMINISTRADOR')">Administrador</small>
+            <small sec:authorize="!hasRole('ADMINISTRADOR')">Encargado de ventas</small>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" title="Cerrar sesión" aria-label="Cerrar sesión">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18"><path d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4M16 8l4 4-4 4M20 12H9"/></svg>
+            </button>
+        </form>
+    </div>
 </aside>
+
+<!-- Enlace para volver a la pantalla anterior: ~{layout/base :: volver(@{/productos}, 'Productos')} -->
+<a th:fragment="volver(url, texto)" class="back" th:href="${url}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    <span th:text="'Volver a ' + ${texto}">Volver</span>
+</a>
 
 </body>
 </html>

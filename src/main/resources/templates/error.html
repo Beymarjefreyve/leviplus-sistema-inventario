@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Error · Levi Plus</title>
+    <title>Error · Droguería Levi Plus</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="pagina-acceso">
-<main class="tarjeta-acceso">
-    <h1 th:text="${status == 403} ? 'Sin permiso' : (${status == 404} ? 'Página no encontrada' : 'Ocurrió un problema')">Error</h1>
-    <p th:if="${status == 403}">Tu rol no tiene permiso para realizar esta acción.</p>
-    <p th:if="${status == 404}">La página que buscas no existe.</p>
-    <p th:unless="${status == 403 or status == 404}">No se pudo completar la operación. Intenta de nuevo.</p>
-    <p><a th:href="@{/}">Volver al inicio</a></p>
+<body>
+<main class="pagina-error">
+    <div class="card">
+        <h1 style="color:var(--navy);margin-bottom:10px" th:text="${status == 403} ? 'Sin permiso' : (${status == 404} ? 'Página no encontrada' : 'Ocurrió un problema')">Error</h1>
+        <p class="sub" th:if="${status == 403}">Tu rol no tiene permiso para realizar esta acción.</p>
+        <p class="sub" th:if="${status == 404}">La página que buscas no existe.</p>
+        <p class="sub" th:unless="${status == 403 or status == 404}">No se pudo completar la operación. Intenta de nuevo.</p>
+        <p style="margin-top:18px"><a class="btn" th:href="@{/}">Volver al inicio</a></p>
+    </div>
 </main>
 </body>
 </html>

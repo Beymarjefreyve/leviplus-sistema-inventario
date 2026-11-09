@@ -1,25 +1,58 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: cabecera('Inicio')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Bienvenido, <span th:text="${nombre}">Usuario</span></h1>
-    <p>Rol: <strong th:text="${rol}">Administrador</strong></p>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: cabecera('Panel principal')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('inicio')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow" th:text="${rol}">Rol</span>
+            <h1>Bienvenido, <span th:text="${nombre}">Usuario</span></h1>
+            <p>Este es el panel de la droguería. Rol: <strong th:text="${rol}">Administrador</strong>.</p>
+        </div>
+        <div class="actions">
+            <a class="btn" th:href="@{/ventas/nueva}">Registrar venta</a>
+            <a class="btn sec" th:href="@{/existencias}">Consultar existencias</a>
+        </div>
+    </header>
 
     <section th:if="${panel != null}">
-        <h2>Resumen del día</h2>
-        <table class="tabla">
-            <tbody>
-            <tr><th>Ventas registradas hoy</th><td th:text="${panel.ventasHoy}">0</td></tr>
-            <tr><th>Total vendido hoy</th><td th:text="${#numbers.formatDecimal(panel.totalVentasHoy, 1, 'POINT', 2, 'COMMA')}">0,00</td></tr>
-            <tr><th>Lotes próximos a vencer o vencidos</th>
-                <td><a th:href="@{/alertas}" th:text="${panel.lotesPorVencer}">0</a></td></tr>
-            <tr><th>Productos en bajo stock</th>
-                <td><a th:href="@{/alertas}" th:text="${panel.productosBajoStock}">0</a></td></tr>
-            </tbody>
-        </table>
+        <h2 style="font-size:17px;color:var(--navy);margin-bottom:12px">Resumen del día</h2>
+        <div class="stats">
+            <div class="stat dark">
+                <div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5C16 5 14 4.5 12 4.5c-2.6 0-4.5 1.2-4.5 3.2 0 5 9.5 2.3 9.5 7.3 0 2-2 3.5-5 3.5-2.2 0-4.2-.7-5-2.5"/></svg></i>Total vendido hoy</div>
+                <span class="v" th:text="'$ ' + ${#numbers.formatDecimal(panel.totalVentasHoy, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                <span class="n"><span th:text="${panel.ventasHoy}">0</span> ventas registradas hoy, sin anuladas</span>
+            </div>
+            <div class="stat ok">
+                <div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 001 .8h9.6a1 1 0 001-.8L21 7H6"/></svg></i>Ventas registradas hoy</div>
+                <span class="v" th:text="${panel.ventasHoy}">0</span>
+                <span class="n">Cuentan en el balance</span>
+            </div>
+            <div class="stat warn">
+                <div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16V11a6 6 0 10-12 0v5l-2 2h16zM10 21h4"/></svg></i>Lotes por vencer o vencidos</div>
+                <a class="v" style="color:var(--navy)" th:href="@{/alertas}" th:text="${panel.lotesPorVencer}">0</a>
+                <span class="n">Según los días de alerta de cada producto</span>
+            </div>
+            <div class="stat warn">
+                <div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 20h20zM12 10v4.5M12 17.5h.01"/></svg></i>Productos en bajo stock</div>
+                <a class="v" style="color:var(--navy)" th:href="@{/alertas}" th:text="${panel.productosBajoStock}">0</a>
+                <span class="n">En o por debajo de su mínimo</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card" th:if="${panel == null}">
+        <h2>Accesos rápidos</h2>
+        <p class="sub" style="margin-bottom:14px">Desde aquí puede registrar ventas, consultar existencias y atender a los clientes frecuentes.</p>
+        <div class="actions">
+            <a class="btn" th:href="@{/ventas/nueva}">Registrar venta</a>
+            <a class="btn sec" th:href="@{/existencias}">Consultar existencias</a>
+            <a class="btn sec" th:href="@{/clientes}">Clientes frecuentes</a>
+        </div>
     </section>
 </main>
+</div>
 </body>
 </html>
