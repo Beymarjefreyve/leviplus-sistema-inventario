@@ -68,6 +68,9 @@
             <a th:href="@{/alertas}" th:classappend="${activo == 'alertas'} ? 'on'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 16V11a6 6 0 10-12 0v5l-2 2h16zM10 21h4"/></svg>
                 <span>Alertas</span></a>
+            <a th:href="@{/reportes}" th:classappend="${activo == 'reportes'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+                <span>Reportes</span></a>
         </div>
 
         <div class="nav-g" sec:authorize="hasRole('ADMINISTRADOR')">

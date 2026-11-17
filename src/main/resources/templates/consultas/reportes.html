@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Reportes')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('reportes')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Seguimiento</span>
+            <h1>Reportes</h1>
+            <p>Reportes de ventas y movimientos financieros por periodo. Las ventas anuladas no cuentan y las devoluciones se descuentan.</p>
+        </div>
+    </header>
+
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="card">
+        <form th:action="@{/reportes}" method="get" class="filters">
+            <label>Tipo de reporte
+                <select id="tipo" name="tipo">
+                    <option value="ventas" th:selected="${tipo == 'ventas'}">Ventas</option>
+                    <option value="financiero" th:selected="${tipo == 'financiero'}">Movimientos financieros</option>
+                </select></label>
+            <label>Desde<input id="desde" name="desde" type="date" th:value="${desde}"></label>
+            <label>Hasta<input id="hasta" name="hasta" type="date" th:value="${hasta}"></label>
+            <button class="btn" type="submit">Generar</button>
+            <a class="btn sec" th:if="${reporte != null}"
+               th:href="@{/reportes/csv(tipo=${tipo}, desde=${desde}, hasta=${hasta})}">Exportar a CSV</a>
+        </form>
+    </section>
+
+    <!-- Reporte de ventas -->
+    <section class="card flush" th:if="${reporte != null and tipo == 'ventas'}">
+        <div class="tw">
+            <table id="tabla-reporte-ventas">
+                <thead><tr><th>Venta</th><th>Fecha y hora</th><th>Atendió</th><th class="num">Total</th><th class="num">Devuelto</th><th class="num">Neto</th></tr></thead>
+                <tbody>
+                <tr th:each="f : ${reporte.filas}">
+                    <td><b th:text="'V-' + ${f.idVenta}">V-1</b></td>
+                    <td th:text="${f.fechaHora}">fecha</td>
+                    <td th:text="${f.atendio}">Usuario</td>
+                    <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(f.total, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                    <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(f.devuelto, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                    <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(f.neto, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                </tr>
+                <tr th:if="${reporte.vacio()}"><td colspan="6" class="empty">No hay información disponible para el periodo seleccionado.</td></tr>
+                </tbody>
+                <tfoot th:unless="${reporte.vacio()}">
+                <tr><th colspan="3">Total del periodo</th>
+                    <th class="num" th:text="'$ ' + ${#numbers.formatDecimal(reporte.totalBruto, 1, 'POINT', 0, 'COMMA')}">$ 0</th>
+                    <th class="num" th:text="'$ ' + ${#numbers.formatDecimal(reporte.totalDevuelto, 1, 'POINT', 0, 'COMMA')}">$ 0</th>
+                    <th class="num" th:text="'$ ' + ${#numbers.formatDecimal(reporte.totalNeto, 1, 'POINT', 0, 'COMMA')}">$ 0</th></tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+    <!-- Reporte financiero con balance -->
+    <th:block th:if="${reporte != null and tipo == 'financiero'}">
+        <div class="stats">
+            <div class="stat"><span class="lbl">Ventas netas</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.ventasNetas, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
+            <div class="stat"><span class="lbl">Otros ingresos</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.otrosIngresos, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
+            <div class="stat"><span class="lbl">Egresos</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.egresos, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
+            <div class="stat dark"><span class="lbl">Balance del periodo</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.balance, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
+        </div>
+        <section class="card flush">
+            <div class="tw">
+                <table id="tabla-reporte-financiero">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Proveedor</th><th class="num">Valor</th></tr></thead>
+                    <tbody>
+                    <tr th:each="f : ${reporte.movimientos}">
+                        <td th:text="${f.fecha}">fecha</td>
+                        <td><span class="pill" th:classappend="${f.tipo == 'Ingreso'} ? '' : 'red'" th:text="${f.tipo}">Ingreso</span></td>
+                        <td th:text="${f.concepto}">Concepto</td>
+                        <td th:text="${f.proveedor == '' ? '—' : f.proveedor}">—</td>
+                        <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(f.valor, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                    </tr>
+                    <tr th:if="${reporte.vacio()}"><td colspan="5" class="empty">No hay información disponible para el periodo seleccionado.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </th:block>
+</main>
+</div>
+</body>
+</html>

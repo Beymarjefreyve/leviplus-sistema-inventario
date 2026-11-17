@@ -15,6 +15,11 @@ public interface DevolucionRepository extends JpaRepository<Devolucion, Integer>
             + "order by d.fechaHora asc, d.idDevolucion asc")
     List<Devolucion> deLaVenta(@Param("idVenta") Integer idVenta);
 
+    /** Valor devuelto de cada venta indicada: filas {idVenta, suma}. */
+    @Query("select d.venta.idVenta, sum(d.valorDevuelto) from Devolucion d where d.venta.idVenta in :ids "
+            + "group by d.venta.idVenta")
+    List<Object[]> valorDevueltoPorVenta(@Param("ids") java.util.Collection<Integer> ids);
+
     /** Unidades ya devueltas de una venta, por detalle y lote: {idDetalleVenta, idLote, cantidad}. */
     @Query("select dd.detalleVenta.idDetalleVenta, dd.lote.idLote, sum(dd.cantidad) from DetalleDevolucion dd "
             + "where dd.devolucion.venta.idVenta = :idVenta group by dd.detalleVenta.idDetalleVenta, dd.lote.idLote")
