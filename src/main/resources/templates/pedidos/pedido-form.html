@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Registrar pedido')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('pedidos')}"></aside>
+<main class="main">
+    <div th:replace="~{layout/base :: volver(@{/pedidos}, 'Pedidos')}"></div>
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Ventas</span>
+            <h1>Registrar pedido</h1>
+            <p>Digite los datos del pedido recibido. WhatsApp solo indica el origen: el sistema no envía ni recibe mensajes.</p>
+        </div>
+    </header>
+
+    <section class="card form">
+        <form class="fld" th:action="@{/pedidos}" th:object="${pedidoForm}" method="post">
+            <div class="err" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+            <label>Cliente frecuente (opcional)
+                <select id="idCliente" th:field="*{idCliente}">
+                    <option value="">— Cliente no registrado —</option>
+                    <option th:each="c : ${clientes}" th:value="${c.idCliente}" th:text="${c.nombre} + ' · ' + ${c.telefono}">Cliente</option>
+                </select></label>
+
+            <label>Nombre del cliente
+                <input id="nombreCliente" th:field="*{nombreCliente}" type="text" maxlength="100" autocomplete="off">
+                <span class="campo-error" th:if="${#fields.hasErrors('nombreCliente')}" th:errors="*{nombreCliente}"></span></label>
+
+            <label>Teléfono de contacto
+                <input id="telefono" th:field="*{telefono}" type="tel" maxlength="20" autocomplete="off">
+                <span class="campo-error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span></label>
+
+            <label>Fecha del pedido
+                <input id="fecha" th:field="*{fecha}" type="date">
+                <span class="campo-error" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></span></label>
+
+            <label>Origen
+                <select id="origen" th:field="*{origen}">
+                    <option th:each="o : ${origenes}" th:value="${o}" th:text="${o.etiqueta}">Origen</option>
+                </select></label>
+
+            <label>Modalidad
+                <select id="modalidad" th:field="*{modalidad}">
+                    <option th:each="m : ${modalidades}" th:value="${m}" th:text="${m.etiqueta}">Modalidad</option>
+                </select></label>
+
+            <label>Dirección (obligatoria a domicilio)
+                <input id="direccion" th:field="*{direccion}" type="text" maxlength="150" autocomplete="off">
+                <span class="campo-error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></span></label>
+
+            <label>Observaciones
+                <input id="observaciones" th:field="*{observaciones}" type="text" maxlength="250" autocomplete="off">
+                <span class="campo-error" th:if="${#fields.hasErrors('observaciones')}" th:errors="*{observaciones}"></span></label>
+
+            <h2>Productos solicitados</h2>
+            <p class="sub">Elija los productos y sus cantidades. Las filas vacías se ignoran.</p>
+            <div class="tw">
+                <table>
+                    <thead><tr><th>Producto</th><th class="num">Cantidad</th></tr></thead>
+                    <tbody>
+                    <tr th:each="l, st : *{lineas}">
+                        <td>
+                            <select th:field="*{lineas[__${st.index}__].idProducto}" th:id="'producto' + ${st.index}">
+                                <option value="">—</option>
+                                <option th:each="p : ${productos}" th:value="${p.idProducto}"
+                                        th:text="${p.nombre} + ' · ' + ${p.presentacion}">Producto</option>
+                            </select>
+                        </td>
+                        <td class="num">
+                            <input th:field="*{lineas[__${st.index}__].cantidad}" th:id="'cantidad' + ${st.index}" type="number" min="1" max="100000">
+                            <span class="campo-error" th:if="${#fields.hasErrors('lineas[__${st.index}__].cantidad')}" th:errors="*{lineas[__${st.index}__].cantidad}"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Guardar pedido</button>
+                <a class="btn sec" th:href="@{/pedidos}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</main>
+</div>
+</body>
+</html>

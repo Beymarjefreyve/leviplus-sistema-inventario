@@ -51,6 +51,9 @@
             <a th:href="@{/clientes}" th:classappend="${activo == 'clientes'} ? 'on'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 5.6a5.2 5.2 0 00-7.4 0L12 7l-1.4-1.4a5.2 5.2 0 00-7.4 7.4L12 21.8l8.8-8.8a5.2 5.2 0 000-7.4z"/></svg>
                 <span>Clientes frecuentes</span></a>
+            <a th:href="@{/pedidos}" th:classappend="${activo == 'pedidos'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l1 2h3v16H5V5h3zM9 12h6M9 16h6"/></svg>
+                <span>Pedidos</span></a>
         </div>
 
         <div class="nav-g" sec:authorize="hasRole('ADMINISTRADOR')">
