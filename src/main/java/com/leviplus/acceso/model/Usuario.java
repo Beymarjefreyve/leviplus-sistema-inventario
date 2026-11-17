@@ -66,6 +66,10 @@ public class Usuario {
         this.estado = EstadoRegistro.INACTIVO;
     }
 
+    public void activar() {
+        this.estado = EstadoRegistro.ACTIVO;
+    }
+
     public void asignarRol(Rol nuevoRol) {
         this.rol = nuevoRol;
     }

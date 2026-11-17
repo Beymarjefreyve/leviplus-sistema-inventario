@@ -17,16 +17,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /** Ventas (RF-08, RF-09), historial (RF-10, RF-11) y anulación (RF-25). */
 @Controller
 @RequestMapping("/ventas")
 public class VentaController {
 
-    private static final int FILAS_INICIALES = 3;
+    private static final int RESULTADOS_BUSQUEDA = 20;
+
+    /** Línea del carrito con los datos que necesita la pantalla para dibujarla. */
+    public record LineaCarrito(Integer idProducto, String nombre, String presentacion, String codigo,
+                               BigDecimal precio, long existencia, int cantidad) {
+    }
 
     private final VentaService servicio;
 
@@ -37,13 +47,17 @@ public class VentaController {
     @GetMapping("/nueva")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
     public String nueva(Model modelo) {
-        VentaForm form = new VentaForm();
-        for (int i = 0; i < FILAS_INICIALES; i++) {
-            form.getLineas().add(new VentaForm.Linea());
-        }
-        modelo.addAttribute("ventaForm", form);
-        modelo.addAttribute("productos", servicio.productosVendibles());
+        modelo.addAttribute("ventaForm", new VentaForm());
+        modelo.addAttribute("carrito", List.of());
         return "ventas/venta-form";
+    }
+
+    /** Buscador del formulario de venta (JSON): nombre, presentación o código; máximo 20 resultados. */
+    @GetMapping("/productos")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
+    public List<VentaService.ProductoVendible> buscarProductos(@RequestParam(required = false) String q) {
+        return servicio.buscarVendibles(q, RESULTADOS_BUSQUEDA);
     }
 
     @PostMapping
@@ -58,11 +72,29 @@ public class VentaController {
                 errores.reject("negocio", e.getMessage());
             }
         }
-        while (ventaForm.getLineas().size() < FILAS_INICIALES) {
-            ventaForm.getLineas().add(new VentaForm.Linea());
-        }
-        modelo.addAttribute("productos", servicio.productosVendibles());
+        modelo.addAttribute("carrito", carritoDe(ventaForm));
         return "ventas/venta-form";
+    }
+
+    /** Reconstruye el carrito con las líneas que el usuario había enviado, para no perderlas tras un error. */
+    private List<LineaCarrito> carritoDe(VentaForm form) {
+        List<Integer> ids = new ArrayList<>();
+        for (VentaForm.Linea linea : form.getLineas()) {
+            if (linea != null && linea.getIdProducto() != null) {
+                ids.add(linea.getIdProducto());
+            }
+        }
+        Map<Integer, VentaService.ProductoVendible> datos = servicio.vendiblesPorIds(ids);
+        List<LineaCarrito> carrito = new ArrayList<>();
+        for (VentaForm.Linea linea : form.getLineas()) {
+            if (linea == null || linea.getIdProducto() == null || !datos.containsKey(linea.getIdProducto())) {
+                continue;
+            }
+            VentaService.ProductoVendible p = datos.get(linea.getIdProducto());
+            carrito.add(new LineaCarrito(p.idProducto(), p.nombre(), p.presentacion(), p.codigo(), p.precio(),
+                    p.existencia(), linea.getCantidad() == null ? 1 : linea.getCantidad()));
+        }
+        return carrito;
     }
 
     /** Comprobante de la venta. */
@@ -70,7 +102,11 @@ public class VentaController {
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
     public String comprobante(@PathVariable Integer id, Model modelo) {
         modelo.addAttribute("venta", servicio.obtener(id));
-        modelo.addAttribute("devoluciones", servicio.devolucionesDe(id));
+        List<com.leviplus.ventas.model.Devolucion> devoluciones = servicio.devolucionesDe(id);
+        modelo.addAttribute("devoluciones", devoluciones);
+        modelo.addAttribute("totalDevuelto", devoluciones.stream()
+                .map(com.leviplus.ventas.model.Devolucion::getValorDevuelto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
         return "ventas/comprobante";
     }
 

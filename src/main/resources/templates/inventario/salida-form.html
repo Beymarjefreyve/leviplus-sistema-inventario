@@ -1,47 +1,63 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Registrar salida')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Registrar salida</h1>
-    <p class="resumen">
-        <strong th:text="${producto.nombre}">Producto</strong> · <span th:text="${producto.presentacion}">Presentación</span><br>
-        Existencia actual: <strong th:text="${existencia}">0</strong>
-    </p>
-
-    <form class="formulario" th:action="@{/productos/{id}/salida(id=${producto.idProducto})}"
-          th:object="${salidaForm}" method="post">
-        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
-
-        <label for="idLote">Lote</label>
-        <select id="idLote" th:field="*{idLote}">
-            <option value="">Selecciona un lote</option>
-            <option th:each="l : ${lotes}" th:value="${l.idLote}"
-                    th:text="${l.codigoLote + ' · vence ' + l.fechaVencimiento + ' · ' + l.cantidadDisponible + ' disp.'}">Lote</option>
-        </select>
-        <span class="campo-error" th:if="${#fields.hasErrors('idLote')}" th:errors="*{idLote}"></span>
-
-        <label for="cantidad">Cantidad</label>
-        <input id="cantidad" th:field="*{cantidad}" type="number" step="1" min="1">
-        <span class="campo-error" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></span>
-
-        <label for="motivo">Motivo</label>
-        <select id="motivo" th:field="*{motivo}">
-            <option value="">Selecciona el motivo</option>
-            <option th:each="m : ${motivos}" th:value="${m.name()}" th:text="${m.etiqueta}">Motivo</option>
-        </select>
-        <span class="campo-error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></span>
-
-        <label for="observacion">Observación (opcional)</label>
-        <input id="observacion" th:field="*{observacion}" type="text" maxlength="200">
-        <span class="campo-error" th:if="${#fields.hasErrors('observacion')}" th:errors="*{observacion}"></span>
-
-        <div class="botones">
-            <button type="submit">Registrar salida</button>
-            <a class="boton secundario" th:href="@{/productos}">Cancelar</a>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('movimientos')}"></aside>
+<main class="main">
+    <div th:replace="~{layout/base :: volver(@{/inventario}, 'Entradas y salidas')}"></div>
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Inventario</span>
+            <h1>Registrar salida</h1>
+            <p>Las salidas se descuentan del lote elegido.</p>
         </div>
-    </form>
+    </header>
+
+    <section class="card form">
+        <div class="card-h">
+            <div class="pcell">
+                <span class="avatar" style="background:#E6EEFA;color:#163F86" th:text="${#strings.toUpperCase(#strings.substring(producto.nombre, 0, 2))}">PR</span>
+                <div><h2 style="margin:0" th:text="${producto.nombre}">Producto</h2><small th:text="${producto.presentacion}">Presentación</small></div>
+            </div>
+            <span class="pill blue">Existencia actual: <span th:text="${existencia}">0</span></span>
+        </div>
+
+        <form class="fld" th:action="@{/productos/{id}/salida(id=${producto.idProducto})}"
+              th:object="${salidaForm}" method="post">
+            <div class="err" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+
+            <label>Lote
+                <select id="idLote" th:field="*{idLote}">
+                    <option value="">Selecciona un lote</option>
+                    <option th:each="l : ${lotes}" th:value="${l.idLote}"
+                            th:text="${l.codigoLote + ' · vence ' + l.fechaVencimiento + ' · ' + l.cantidadDisponible + ' disp.'}">Lote</option>
+                </select>
+                <span class="campo-error" th:if="${#fields.hasErrors('idLote')}" th:errors="*{idLote}"></span></label>
+
+            <div class="row2">
+                <label>Cantidad
+                    <input id="cantidad" th:field="*{cantidad}" type="number" step="1" min="1">
+                    <span class="campo-error" th:if="${#fields.hasErrors('cantidad')}" th:errors="*{cantidad}"></span></label>
+                <label>Motivo
+                    <select id="motivo" th:field="*{motivo}">
+                        <option value="">Selecciona el motivo</option>
+                        <option th:each="m : ${motivos}" th:value="${m.name()}" th:text="${m.etiqueta}">Motivo</option>
+                    </select>
+                    <span class="campo-error" th:if="${#fields.hasErrors('motivo')}" th:errors="*{motivo}"></span></label>
+            </div>
+
+            <label>Observación (opcional)
+                <input id="observacion" th:field="*{observacion}" type="text" maxlength="200">
+                <span class="campo-error" th:if="${#fields.hasErrors('observacion')}" th:errors="*{observacion}"></span></label>
+
+            <div class="form-actions">
+                <button class="btn" type="submit">Registrar salida</button>
+                <a class="btn sec" th:href="@{/inventario}">Cancelar</a>
+            </div>
+        </form>
+    </section>
 </main>
+</div>
 </body>
 </html>

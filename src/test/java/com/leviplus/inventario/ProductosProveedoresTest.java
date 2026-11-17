@@ -26,6 +26,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -135,7 +136,70 @@ class ProductosProveedoresTest {
         assertThat(productos.findById(paracetamol.getIdProducto()).orElseThrow().estaActivo()).isTrue();
     }
 
+    @Test
+    void reactivarProductoLoDejaDisponibleOtraVez() throws Exception {
+        paracetamol.inactivar();
+        productos.save(paracetamol);
+        mvc.perform(post("/productos/{id}/reactivar", paracetamol.getIdProducto())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(redirectedUrl("/productos"))
+                .andExpect(flash().attributeExists("ok"));
+        assertThat(productos.findById(paracetamol.getIdProducto()).orElseThrow().estaActivo()).isTrue();
+        mvc.perform(post("/productos/{id}/reactivar", paracetamol.getIdProducto())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(flash().attributeExists("error"));
+        mvc.perform(post("/productos/{id}/reactivar", paracetamol.getIdProducto())
+                        .with(user("beto").roles("ENCARGADO_DE_VENTAS")).with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void listadoDeProductosSeBuscaPorTextoYEstado() throws Exception {
+        productos.save(new Producto("P-002", "Ibuprofeno 400 mg", "Caja x 10", "MK", new BigDecimal("8900.00"), 5, 30));
+        mvc.perform(get("/productos").param("q", "ibupro").with(user("ana").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("Ibuprofeno 400 mg")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Paracetamol 500 mg"))));
+        paracetamol.inactivar();
+        productos.save(paracetamol);
+        mvc.perform(get("/productos").param("estado", "inactivos").with(user("ana").roles("ADMINISTRADOR")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("Paracetamol 500 mg")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Ibuprofeno 400 mg"))));
+    }
+
+    @Test
+    void pantallaDeEntradasYSalidasBuscaProductosActivos() throws Exception {
+        productos.save(new Producto("P-002", "Ibuprofeno 400 mg", "Caja x 10", "MK", new BigDecimal("8900.00"), 5, 30));
+        mvc.perform(get("/inventario").param("q", "paracet").with(user("ana").roles("ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("inventario/movimientos"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("Paracetamol 500 mg")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Ibuprofeno 400 mg"))));
+        mvc.perform(get("/inventario").with(user("beto").roles("ENCARGADO_DE_VENTAS")))
+                .andExpect(status().isForbidden());
+    }
+
     // ---- Proveedores (RF-21, RF-22)
+
+    @Test
+    void reactivarProveedorLoDejaDisponibleOtraVez() throws Exception {
+        Proveedor proveedor = proveedores.findAll().get(0);
+        mvc.perform(post("/proveedores/{id}/inactivar", proveedor.getIdProveedor())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(redirectedUrl("/proveedores"));
+        assertThat(proveedores.findById(proveedor.getIdProveedor()).orElseThrow().estaActivo()).isFalse();
+        mvc.perform(post("/proveedores/{id}/reactivar", proveedor.getIdProveedor())
+                        .with(user("ana").roles("ADMINISTRADOR")).with(csrf()))
+                .andExpect(redirectedUrl("/proveedores"))
+                .andExpect(flash().attributeExists("ok"));
+        assertThat(proveedores.findById(proveedor.getIdProveedor()).orElseThrow().estaActivo()).isTrue();
+    }
 
     @Test
     void administradorRegistraYListaProveedores() throws Exception {

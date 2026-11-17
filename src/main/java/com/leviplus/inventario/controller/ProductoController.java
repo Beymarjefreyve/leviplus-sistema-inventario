@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/productos")
 public class ProductoController {
+
+    private static final int LIMITE_FILAS = 100;
 
     private final ProductoService servicio;
 
@@ -26,8 +29,13 @@ public class ProductoController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public String listar(Model modelo) {
-        modelo.addAttribute("productos", servicio.listar());
+    public String listar(@RequestParam(required = false) String q,
+                         @RequestParam(required = false, defaultValue = "todos") String estado, Model modelo) {
+        modelo.addAttribute("productos", servicio.buscar(q, estado, LIMITE_FILAS));
+        modelo.addAttribute("total", servicio.listar().size());
+        modelo.addAttribute("limite", LIMITE_FILAS);
+        modelo.addAttribute("q", q == null ? "" : q);
+        modelo.addAttribute("estado", estado);
         modelo.addAttribute("existencias", servicio.existencias());
         return "inventario/productos";
     }
@@ -97,6 +105,18 @@ public class ProductoController {
         try {
             servicio.inactivar(id);
             aviso.addFlashAttribute("ok", "Producto inactivado; su historial se conserva");
+        } catch (ReglaDeNegocioException e) {
+            aviso.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/productos";
+    }
+
+    @PostMapping("/{id}/reactivar")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String reactivar(@PathVariable Integer id, RedirectAttributes aviso) {
+        try {
+            servicio.reactivar(id);
+            aviso.addFlashAttribute("ok", "Producto reactivado; ya está disponible en entradas y ventas");
         } catch (ReglaDeNegocioException e) {
             aviso.addFlashAttribute("error", e.getMessage());
         }

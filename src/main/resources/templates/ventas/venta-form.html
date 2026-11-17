@@ -1,41 +1,50 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/base :: cabecera('Nueva venta')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Nueva venta</h1>
+<head th:replace="~{layout/base :: cabecera('Registrar venta')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('venta')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Ventas</span>
+            <h1>Registrar venta</h1>
+            <p>Busque el producto por nombre, presentación o código (también funciona con lector de código de barras) y agréguelo a la venta.
+                Al confirmar, el inventario se descuenta empezando por el lote que vence primero.</p>
+        </div>
+    </header>
 
-    <form class="formulario ancho" th:action="@{/ventas}" th:object="${ventaForm}" method="post">
-        <p class="mensaje error" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
+    <form id="form-venta" th:action="@{/ventas}" th:object="${ventaForm}" method="post">
+        <div class="err" style="margin-bottom:16px" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div>
+        <div class="err" style="margin-bottom:16px" th:each="e : ${#fields.errors('lineas*')}" th:text="${e}"></div>
 
-        <table class="tabla" id="lineas-venta">
-            <thead><tr><th>Producto</th><th>Cantidad</th></tr></thead>
-            <tbody>
-            <tr class="linea" th:each="l, st : *{lineas}">
-                <td>
-                    <select th:name="|lineas[${st.index}].idProducto|">
-                        <option value="">— Selecciona un producto —</option>
-                        <option th:each="p : ${productos}" th:value="${p.idProducto}"
-                                th:selected="${p.idProducto == l.idProducto}"
-                                th:text="|${p.nombre} · ${p.presentacion} · ${p.codigo} · ${#numbers.formatDecimal(p.precio, 1, 'POINT', 2, 'COMMA')} · disp. ${p.existencia}|">Producto</option>
-                    </select>
-                </td>
-                <td><input type="number" min="1" th:name="|lineas[${st.index}].cantidad|" th:value="${l.cantidad}"></td>
-            </tr>
-            </tbody>
-        </table>
-        <span class="campo-error" th:if="${#fields.hasErrors('lineas')}" th:errors="*{lineas}"></span>
-        <p class="campo-error" th:each="e : ${#fields.errors('lineas*')}" th:text="${e}"></p>
+        <div id="venta-app" class="sale" th:attr="data-url=@{/ventas/productos}">
+            <section class="card flush">
+                <div class="search big-search">
+                    <label>Buscar producto
+                        <input id="buscar" type="search" maxlength="100" autocomplete="off" autofocus
+                               placeholder="Escriba el nombre o escanee el código y pulse Enter"></label>
+                </div>
+                <div id="aviso-venta" class="err" role="alert" style="display:none;margin:12px 16px 0"></div>
+                <div id="resultados"><p class="empty">Cargando productos…</p></div>
+            </section>
 
-        <button type="button" class="boton secundario" id="agregar-linea">Agregar otro producto</button>
-
-        <div class="botones">
-            <button type="submit">Confirmar venta</button>
-            <a class="boton secundario" th:href="@{/}">Cancelar</a>
+            <aside class="card cart">
+                <div class="card-h"><h2 style="margin:0">Venta actual</h2><span id="cant-productos" class="sub">0 productos</span></div>
+                <div id="carrito"></div>
+                <div id="lineas-ocultas"></div>
+                <div style="margin-top:12px">
+                    <div class="sum"><span class="sub">Unidades</span><b id="unidades">0</b></div>
+                    <div class="sum t"><span>Total</span><span id="total">$ 0</span></div>
+                </div>
+                <button id="confirmar" class="btn lg" type="submit" style="margin-top:14px" disabled>Confirmar venta</button>
+                <button id="vaciar" class="btn sec lg" type="button" style="margin-top:10px;height:42px">Vaciar venta</button>
+            </aside>
         </div>
     </form>
 </main>
+</div>
+<script th:inline="javascript">window.CARRITO_INICIAL = /*[[${carrito}]]*/ [];</script>
 <script th:src="@{/js/venta.js}"></script>
 </body>
 </html>

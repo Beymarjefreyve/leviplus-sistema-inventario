@@ -1,42 +1,62 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Alertas')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <h1>Alertas</h1>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('alertas')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Seguimiento</span>
+            <h1>Alertas</h1>
+            <p>El sistema revisa los lotes y las existencias cada vez que usted ingresa. Cada producto avisa según sus días de alerta.</p>
+        </div>
+        <div class="actions"><a class="btn sec" th:href="@{/inventario}">Registrar entrada o salida</a></div>
+    </header>
 
-    <h2>Lotes próximos a vencer</h2>
-    <table class="tabla">
-        <thead><tr><th>Producto</th><th>Presentación</th><th>Lote</th><th>Vence</th><th>Cantidad</th><th>Estado</th></tr></thead>
-        <tbody>
-        <tr th:each="a : ${porVencer}">
-            <td th:text="${a.producto}">Producto</td>
-            <td th:text="${a.presentacion}">Presentación</td>
-            <td th:text="${a.codigoLote}">L1</td>
-            <td th:text="${#temporals.format(a.fechaVencimiento, 'dd/MM/yyyy')}">fecha</td>
-            <td th:text="${a.cantidad}">0</td>
-            <td><span class="etiqueta alerta"
-                      th:text="${a.vencido()} ? 'Vencido hace ' + ${-a.diasRestantes} + ' días' : (${a.diasRestantes == 0} ? 'Vence hoy' : 'Vence en ' + ${a.diasRestantes} + ' días')">Vence</span></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(porVencer)}"><td colspan="6">No hay lotes próximos a vencer.</td></tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <div class="card-h" style="padding:18px 22px 0"><h2>Lotes próximos a vencer</h2></div>
+        <div class="tools"><input type="search" data-filtra="tabla-vencer" placeholder="Buscar entre los lotes por vencer" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+            <table id="tabla-vencer">
+                <thead><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="num">Cantidad</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${porVencer}">
+                    <td><b th:text="${a.producto}">Producto</b><br><small class="sub" th:text="${a.presentacion}">Presentación</small></td>
+                    <td th:text="${a.codigoLote}">L1</td>
+                    <td th:text="${#temporals.format(a.fechaVencimiento, 'dd/MM/yyyy')}">fecha</td>
+                    <td class="num" th:text="${a.cantidad}">0</td>
+                    <td><span class="pill" th:classappend="${a.vencido()} ? 'red' : 'warn'"
+                              th:text="${a.vencido()} ? 'Vencido hace ' + ${-a.diasRestantes} + ' días' : (${a.diasRestantes == 0} ? 'Vence hoy' : 'Vence en ' + ${a.diasRestantes} + ' días')">Vence</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(porVencer)}"><td colspan="5" class="empty">No hay lotes próximos a vencer.</td></tr>
+                <tr class="sin-resultados"><td colspan="5" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-    <h2>Productos en bajo stock</h2>
-    <table class="tabla">
-        <thead><tr><th>Código</th><th>Producto</th><th>Presentación</th><th>Existencia</th><th>Stock mínimo</th></tr></thead>
-        <tbody>
-        <tr th:each="a : ${bajoStock}">
-            <td th:text="${a.codigo}">P-1</td>
-            <td th:text="${a.producto}">Producto</td>
-            <td th:text="${a.presentacion}">Presentación</td>
-            <td th:text="${a.existencia}">0</td>
-            <td th:text="${a.stockMinimo}">0</td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(bajoStock)}"><td colspan="5">Ningún producto está por debajo de su stock mínimo.</td></tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <div class="card-h" style="padding:18px 22px 0"><h2>Productos en bajo stock</h2></div>
+        <div class="tools"><input type="search" data-filtra="tabla-bajo" placeholder="Buscar entre los productos en bajo stock" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+            <table id="tabla-bajo">
+                <thead><tr><th>Código</th><th>Producto</th><th class="num">Existencia</th><th class="num">Stock mínimo</th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${bajoStock}">
+                    <td th:text="${a.codigo}">P-1</td>
+                    <td><b th:text="${a.producto}">Producto</b><br><small class="sub" th:text="${a.presentacion}">Presentación</small></td>
+                    <td class="num"><b style="color:var(--danger)" th:text="${a.existencia}">0</b></td>
+                    <td class="num" th:text="${a.stockMinimo}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(bajoStock)}"><td colspan="4" class="empty">Ningún producto está por debajo de su stock mínimo.</td></tr>
+                <tr class="sin-resultados"><td colspan="4" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
+</div>
+<script th:src="@{/js/tabla.js}"></script>
 </body>
 </html>

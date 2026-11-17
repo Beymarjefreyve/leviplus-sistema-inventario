@@ -3,26 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Iniciar sesión · Levi Plus</title>
+    <title>Inicio de sesión · Droguería Levi Plus</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="pagina-acceso">
-<main class="tarjeta-acceso">
-    <h1>Levi Plus</h1>
-    <p class="subtitulo">Control de inventario y gestión operativa</p>
+<body>
+<div class="login">
+    <section class="l">
+        <div style="display:flex;align-items:center;gap:16px">
+            <div class="big"><img th:src="@{/img/logo.svg}" alt="Logo Droguería Levi Plus"></div>
+            <div><b style="font:700 30px 'Zilla Slab',Georgia,serif;display:block">Levi Plus</b><span style="color:#A9BBDD">Droguería</span></div>
+        </div>
+        <div>
+            <span class="tag">Su salud es nuestro compromiso</span>
+            <h2>Inventario, ventas y finanzas de la droguería en un solo lugar</h2>
+            <div class="feat"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5zM3.3 7.5L12 12.5l8.7-5M12 12.5V21"/></svg></i>
+                <div><b>Inventario por lotes</b><span>Cada entrada registra su lote y su fecha de vencimiento.</span></div></div>
+            <div class="feat"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 001 .8h9.6a1 1 0 001-.8L21 7H6"/></svg></i>
+                <div><b>Ventas, anulaciones y devoluciones</b><span>El inventario se descuenta empezando por el lote que vence primero.</span></div></div>
+            <div class="feat"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16V11a6 6 0 10-12 0v5l-2 2h16zM10 21h4"/></svg></i>
+                <div><b>Alertas a tiempo</b><span>Avisos de vencimiento y de bajo stock.</span></div></div>
+        </div>
+        <span style="font-size:13px;color:#A9BBDD">Calle 2 No. 8-98, esquina, barrio El Callejón · Cúcuta · Horario: 8:00 a. m. a 9:00 p. m.</span>
+    </section>
 
-    <p class="mensaje error" th:if="${param.error}">Usuario o contraseña incorrectos, o cuenta desactivada.</p>
-    <p class="mensaje ok" th:if="${param.salio}">Cerraste sesión correctamente.</p>
-
-    <form th:action="@{/login}" method="post">
-        <label for="username">Usuario</label>
-        <input id="username" name="username" type="text" autocomplete="username" required autofocus>
-
-        <label for="password">Contraseña</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" required>
-
-        <button type="submit">Ingresar</button>
-    </form>
-</main>
+    <section class="r">
+        <form th:action="@{/login}" method="post" autocomplete="off">
+            <div>
+                <h1>Bienvenido</h1>
+                <p class="sub" style="margin-top:6px">Ingrese con el usuario y la contraseña que le asignó el administrador.</p>
+            </div>
+            <div class="err" role="alert" th:if="${param.error}">Usuario o contraseña incorrectos, o cuenta desactivada.</div>
+            <div class="msg ok" role="status" th:if="${param.salio}" style="margin:0">Cerraste sesión correctamente.</div>
+            <label>Usuario
+                <input id="username" name="username" type="text" autocomplete="username" required autofocus></label>
+            <label>Contraseña
+                <input id="password" name="password" type="password" autocomplete="current-password" required></label>
+            <button class="btn lg" type="submit">Ingresar</button>
+            <span class="sub" style="text-align:center">Si olvidó sus datos de acceso, comuníquese con el administrador de la droguería.</span>
+        </form>
+    </section>
+</div>
 </body>
 </html>

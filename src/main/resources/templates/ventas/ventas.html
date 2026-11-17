@@ -1,52 +1,68 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Historial de ventas')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <div class="barra-titulo">
-        <h1>Historial de ventas</h1>
-        <div class="acciones-titulo"><a class="boton" th:href="@{/ventas/nueva}">Nueva venta</a></div>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('historial')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Ventas</span>
+            <h1>Historial de ventas</h1>
+            <p>Consulte las ventas por fecha o periodo. Desde el detalle puede anular una venta o registrar una devolución.</p>
+        </div>
+        <div class="actions"><a class="btn" th:href="@{/ventas/nueva}">Registrar venta</a></div>
+    </header>
+
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="card">
+        <form th:action="@{/ventas}" method="get" class="filters">
+            <label>Desde<input id="desde" name="desde" type="date" th:value="${desde}"></label>
+            <label>Hasta<input id="hasta" name="hasta" type="date" th:value="${hasta}"></label>
+            <button class="btn" type="submit">Consultar</button>
+        </form>
+    </section>
+
+    <div class="grid2">
+        <section class="card flush">
+            <div class="tools"><input type="search" data-filtra="tabla-ventas" placeholder="Buscar por número, vendedor, estado o fecha" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+                <table id="tabla-ventas">
+                    <thead><tr><th>Venta</th><th>Fecha y hora</th><th>Atendió</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="v : ${ventas}">
+                        <td><b th:text="'V-' + ${v.idVenta}">V-1</b></td>
+                        <td th:text="${#temporals.format(v.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                        <td th:text="${v.usuario.nombreCompleto}">Usuario</td>
+                        <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(v.total, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                        <td><span class="pill" th:classappend="${v.anulada} ? 'red'"
+                                  th:text="${v.anulada} ? 'Anulada' : 'Registrada'">Registrada</span></td>
+                        <td><a th:href="@{/ventas/{id}(id=${v.idVenta})}">Ver detalle</a></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(ventas)}"><td colspan="6" class="empty">No hay ventas en el periodo seleccionado.</td></tr>
+                    <tr class="sin-resultados"><td colspan="6" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+                </table>
+            </div>
+            <div class="foot" th:text="${#lists.size(ventas)} + ' ventas'">0 ventas</div>
+        </section>
+
+        <section class="card">
+            <h2>Productos más vendidos</h2>
+            <p class="sub" style="margin:-8px 0 14px">Del periodo consultado, sin ventas anuladas.</p>
+            <ol class="top-list">
+                <li th:each="p, st : ${masVendidos}">
+                    <span class="pos" th:text="${st.count}">1</span>
+                    <span class="nm"><span th:text="${p.nombre}">Producto</span> <small class="sub" th:text="${p.presentacion}">Presentación</small></span>
+                    <b th:text="${p.unidades} + ' und'">0</b>
+                </li>
+                <li class="sub" th:if="${#lists.isEmpty(masVendidos)}">Sin ventas registradas en el periodo.</li>
+            </ol>
+        </section>
     </div>
-
-    <form class="formulario ancho" th:action="@{/ventas}" method="get">
-        <label for="desde">Desde</label>
-        <input id="desde" name="desde" type="date" th:value="${desde}">
-        <label for="hasta">Hasta</label>
-        <input id="hasta" name="hasta" type="date" th:value="${hasta}">
-        <div class="botones"><button type="submit">Consultar</button></div>
-    </form>
-
-    <p class="mensaje error" th:if="${error}" th:text="${error}"></p>
-
-    <table class="tabla">
-        <thead><tr><th>N.º</th><th>Fecha</th><th>Atendió</th><th>Total</th><th>Estado</th><th></th></tr></thead>
-        <tbody>
-        <tr th:each="v : ${ventas}">
-            <td th:text="${v.idVenta}">1</td>
-            <td th:text="${#temporals.format(v.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</td>
-            <td th:text="${v.usuario.nombreCompleto}">Usuario</td>
-            <td th:text="${#numbers.formatDecimal(v.total, 1, 'POINT', 2, 'COMMA')}">0,00</td>
-            <td><span class="etiqueta" th:classappend="${v.anulada} ? 'alerta' : 'activo'"
-                      th:text="${v.anulada} ? 'Anulada' : 'Registrada'">Registrada</span></td>
-            <td><a th:href="@{/ventas/{id}(id=${v.idVenta})}">Ver</a></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(ventas)}"><td colspan="6">No hay ventas en el periodo seleccionado.</td></tr>
-        </tbody>
-    </table>
-
-    <h2>Productos más vendidos del periodo</h2>
-    <table class="tabla">
-        <thead><tr><th>Producto</th><th>Presentación</th><th>Unidades</th></tr></thead>
-        <tbody>
-        <tr th:each="p : ${masVendidos}">
-            <td th:text="${p.nombre}">Producto</td>
-            <td th:text="${p.presentacion}">Presentación</td>
-            <td th:text="${p.unidades}">0</td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(masVendidos)}"><td colspan="3">Sin ventas registradas en el periodo.</td></tr>
-        </tbody>
-    </table>
 </main>
+</div>
+<script th:src="@{/js/tabla.js}"></script>
 </body>
 </html>

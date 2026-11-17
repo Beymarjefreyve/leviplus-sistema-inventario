@@ -80,6 +80,17 @@ public class UsuarioService {
         usuarios.save(usuario);
     }
 
+    /** Vuelve a permitir el ingreso de un usuario desactivado; conserva su registro y su rol. */
+    @Transactional
+    public void activar(Integer id) {
+        Usuario usuario = obtener(id);
+        if (usuario.estaActivo()) {
+            throw new ReglaDeNegocioException("El usuario ya está activo");
+        }
+        usuario.activar();
+        usuarios.save(usuario);
+    }
+
     private void exigirOtroAdministradorActivo(Usuario usuario) {
         if (usuario.estaActivo()
                 && usuarios.countByRolAndEstado(Rol.ADMINISTRADOR, EstadoRegistro.ACTIVO) <= 1) {

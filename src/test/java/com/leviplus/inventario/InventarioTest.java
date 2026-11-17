@@ -165,7 +165,7 @@ class InventarioTest {
                         .with(user("ana").roles("ADMINISTRADOR")).with(csrf())
                         .param("idLote", String.valueOf(lote.getIdLote()))
                         .param("cantidad", "15").param("motivo", "DANO").param("observacion", "Caja mojada"))
-                .andExpect(redirectedUrl("/productos"))
+                .andExpect(redirectedUrl("/inventario"))
                 .andExpect(flash().attributeExists("ok"));
 
         assertThat(existencia()).isEqualTo(25);

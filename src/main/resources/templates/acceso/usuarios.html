@@ -1,39 +1,54 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/base :: cabecera('Usuarios')}"></head>
-<body class="con-menu">
-<aside th:replace="~{layout/base :: menu}"></aside>
-<main class="contenido">
-    <div class="barra-titulo">
-        <h1>Usuarios</h1>
-        <a class="boton" th:href="@{/usuarios/nuevo}">Nuevo usuario</a>
-    </div>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('usuarios')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Autenticación y usuarios</span>
+            <h1>Usuarios</h1>
+            <p>Cree usuarios, asigne su rol y controle quién puede ingresar al sistema.</p>
+        </div>
+        <div class="actions"><a class="btn" th:href="@{/usuarios/nuevo}">Nuevo usuario</a></div>
+    </header>
 
-    <p class="mensaje ok" th:if="${ok}" th:text="${ok}"></p>
-    <p class="mensaje error" th:if="${error}" th:text="${error}"></p>
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
 
-    <table class="tabla">
-        <thead>
-        <tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="u : ${usuarios}">
-            <td th:text="${u.nombreCompleto}">Nombre</td>
-            <td th:text="${u.nombreUsuario}">usuario</td>
-            <td th:text="${u.rol.nombre}">Rol</td>
-            <td><span class="etiqueta" th:classappend="${u.estaActivo()} ? 'activo' : 'inactivo'"
-                      th:text="${u.estaActivo()} ? 'Activo' : 'Inactivo'">Activo</span></td>
-            <td class="acciones">
-                <a th:href="@{/usuarios/{id}/editar(id=${u.idUsuario})}">Editar</a>
-                <form th:if="${u.estaActivo()}" th:action="@{/usuarios/{id}/desactivar(id=${u.idUsuario})}" method="post"
-                      onsubmit="return confirm('¿Desactivar este usuario? No podrá ingresar al sistema.');">
-                    <button type="submit" class="peligro">Desactivar</button>
-                </form>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="5">No hay usuarios registrados.</td></tr>
-        </tbody>
-    </table>
+    <section class="card flush">
+        <div class="tools"><input type="search" data-filtra="tabla-usuarios" placeholder="Buscar por nombre, usuario o rol" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+            <table id="tabla-usuarios">
+                <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody>
+                <tr th:each="u : ${usuarios}">
+                    <td><b th:text="${u.nombreCompleto}">Nombre</b></td>
+                    <td th:text="${u.nombreUsuario}">usuario</td>
+                    <td th:text="${u.rol.nombre}">Rol</td>
+                    <td><span class="pill" th:classappend="${u.estaActivo()} ? '' : 'gray'"
+                              th:text="${u.estaActivo()} ? 'Activo' : 'Inactivo'">Activo</span></td>
+                    <td><div class="acc">
+                        <a class="btn sm edit" th:href="@{/usuarios/{id}/editar(id=${u.idUsuario})}">Editar</a>
+                        <form class="inline" th:if="${u.estaActivo()}" th:action="@{/usuarios/{id}/desactivar(id=${u.idUsuario})}" method="post"
+                              onsubmit="return confirm('¿Desactivar este usuario? No podrá ingresar al sistema.');">
+                            <button type="submit" class="btn sm off">Desactivar</button>
+                        </form>
+                        <form class="inline" th:unless="${u.estaActivo()}" th:action="@{/usuarios/{id}/activar(id=${u.idUsuario})}" method="post"
+                              onsubmit="return confirm('¿Activar este usuario? Podrá volver a ingresar al sistema.');">
+                            <button type="submit" class="btn sm on">Activar</button>
+                        </form>
+                    </div></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="5" class="empty">No hay usuarios registrados.</td></tr>
+                <tr class="sin-resultados"><td colspan="5" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
+</div>
+<script th:src="@{/js/tabla.js}"></script>
 </body>
 </html>

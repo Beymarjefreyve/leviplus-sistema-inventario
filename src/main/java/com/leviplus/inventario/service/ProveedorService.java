@@ -59,6 +59,16 @@ public class ProveedorService {
         proveedores.save(proveedor);
     }
 
+    @Transactional
+    public void reactivar(Integer id) {
+        Proveedor proveedor = obtener(id);
+        if (proveedor.estaActivo()) {
+            throw new ReglaDeNegocioException("El proveedor ya está activo");
+        }
+        proveedor.reactivar();
+        proveedores.save(proveedor);
+    }
+
     private String correoONulo(String correo) {
         return correo == null || correo.isBlank() ? null : correo.trim();
     }

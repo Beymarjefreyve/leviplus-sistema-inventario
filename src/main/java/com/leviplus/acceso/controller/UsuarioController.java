@@ -100,6 +100,18 @@ public class UsuarioController {
         return "redirect:/usuarios";
     }
 
+    @PostMapping("/{id}/activar")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String activar(@PathVariable Integer id, RedirectAttributes aviso) {
+        try {
+            servicio.activar(id);
+            aviso.addFlashAttribute("ok", "Usuario activado; ya puede ingresar al sistema");
+        } catch (ReglaDeNegocioException e) {
+            aviso.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/usuarios";
+    }
+
     private void prepararFormulario(Model modelo, Usuario existente) {
         modelo.addAttribute("roles", Rol.values());
         modelo.addAttribute("usuarioEditado", existente);

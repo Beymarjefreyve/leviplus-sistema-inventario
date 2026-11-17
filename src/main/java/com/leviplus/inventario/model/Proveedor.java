@@ -50,6 +50,10 @@ public class Proveedor {
         this.estado = EstadoRegistro.INACTIVO;
     }
 
+    public void reactivar() {
+        this.estado = EstadoRegistro.ACTIVO;
+    }
+
     public Integer getIdProveedor() {
         return idProveedor;
     }

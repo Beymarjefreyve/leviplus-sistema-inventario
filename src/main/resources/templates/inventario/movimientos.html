@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Entradas y salidas')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('movimientos')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Inventario</span>
+            <h1>Entradas y salidas</h1>
+            <p>Busque el producto y elija qué desea registrar. Cada <b>entrada</b> crea un lote con su fecha de vencimiento;
+                cada <b>salida</b> se descuenta del lote que elija.</p>
+        </div>
+    </header>
+
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
+
+    <section class="card flush">
+        <form class="search big-search" th:action="@{/inventario}" method="get">
+            <label>Buscar producto
+                <input type="search" name="q" th:value="${q}" maxlength="100" autocomplete="off" autofocus
+                       placeholder="Nombre, presentación o código del producto"></label>
+            <button class="btn" type="submit">Buscar</button>
+            <a class="btn sec" th:if="${!#strings.isEmpty(q)}" th:href="@{/inventario}">Limpiar</a>
+        </form>
+
+        <div class="tw">
+            <table>
+                <thead><tr><th>Código</th><th>Producto</th><th class="num">Existencia</th><th>Registrar</th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${productos}" th:with="existencia=${existencias.getOrDefault(p.idProducto, 0L)}">
+                    <td th:text="${p.codigoProducto}">COD</td>
+                    <td><div class="pcell">
+                        <span class="avatar" style="background:#E6EEFA;color:#163F86" th:text="${#strings.toUpperCase(#strings.substring(p.nombre, 0, 2))}">PR</span>
+                        <div><b th:text="${p.nombre}">Nombre</b><small th:text="${p.presentacion} + ' · ' + ${p.laboratorio}">Presentación</small></div>
+                    </div></td>
+                    <td class="num">
+                        <b th:text="${existencia} + ' und'">0</b>
+                        <span class="pill warn" th:if="${existencia <= p.stockMinimo}">Bajo stock</span>
+                    </td>
+                    <td>
+                        <div class="acc">
+                            <a class="btn sm ok" th:href="@{/productos/{id}/entrada(id=${p.idProducto})}">Registrar entrada</a>
+                            <a th:if="${existencia > 0}" class="btn sm warn" th:href="@{/productos/{id}/salida(id=${p.idProducto})}">Registrar salida</a>
+                            <span th:unless="${existencia > 0}" class="sub">Sin existencia para sacar</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(productos)}"><td colspan="4" class="empty"
+                    th:text="${#strings.isEmpty(q)} ? 'No hay productos activos registrados.' : 'No se encontró ningún producto activo con ese criterio.'">Sin resultados</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="foot" th:if="${#lists.size(productos) >= limite}">Se muestran los primeros <span th:text="${limite}">20</span> productos; escriba más letras para afinar la búsqueda.</div>
+    </section>
+</main>
+</div>
+</body>
+</html>
