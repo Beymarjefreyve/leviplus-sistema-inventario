@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Pedidos')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('pedidos')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Ventas</span>
+            <h1>Pedidos</h1>
+            <p>Pedidos recibidos por WhatsApp, llamada o en el mostrador, para recoger o a domicilio. Se registran a mano y no descuentan inventario.</p>
+        </div>
+        <div class="actions"><a class="btn" th:href="@{/pedidos/nuevo}">Registrar pedido</a></div>
+    </header>
+
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="card">
+        <form th:action="@{/pedidos}" method="get" class="filters">
+            <label>Desde<input id="desde" name="desde" type="date" th:value="${desde}"></label>
+            <label>Hasta<input id="hasta" name="hasta" type="date" th:value="${hasta}"></label>
+            <label>Origen
+                <select id="origen" name="origen">
+                    <option value="">Todos</option>
+                    <option th:each="o : ${origenes}" th:value="${o}" th:text="${o.etiqueta}"
+                            th:selected="${o == origenElegido}">Origen</option>
+                </select></label>
+            <button class="btn" type="submit">Consultar</button>
+        </form>
+    </section>
+
+    <section class="card flush">
+        <div class="tools"><input type="search" data-filtra="tabla-pedidos" placeholder="Buscar por cliente, teléfono u origen" aria-label="Buscar" autocomplete="off"></div>
+        <div class="tw">
+            <table id="tabla-pedidos">
+                <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Origen</th><th>Modalidad</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${pedidos}">
+                    <td><b th:text="'P-' + ${p.idPedido}">P-1</b></td>
+                    <td th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy')}">fecha</td>
+                    <td th:text="${p.nombreCliente}">Cliente</td>
+                    <td th:text="${p.telefono}">3000000000</td>
+                    <td><span class="pill" th:text="${p.origen.etiqueta}">WhatsApp</span></td>
+                    <td th:text="${p.modalidad.etiqueta}">A domicilio</td>
+                    <td><a th:href="@{/pedidos/{id}(id=${p.idPedido})}">Ver detalle</a></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pedidos)}"><td colspan="7" class="empty">No hay pedidos en el periodo seleccionado.</td></tr>
+                <tr class="sin-resultados"><td colspan="7" class="empty">No se encontraron resultados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="foot" th:text="${#lists.size(pedidos)} + ' pedidos'">0 pedidos</div>
+    </section>
+</main>
+</div>
+<script th:src="@{/js/tabla.js}"></script>
+</body>
+</html>
