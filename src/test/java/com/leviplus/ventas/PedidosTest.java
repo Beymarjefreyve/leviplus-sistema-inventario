@@ -45,6 +45,10 @@ class PedidosTest {
     @Autowired
     ProductoRepository productos;
     @Autowired
+    com.leviplus.inventario.repository.LoteRepository lotes;
+    @Autowired
+    com.leviplus.ventas.repository.VentaRepository ventas;
+    @Autowired
     UsuarioRepository usuarios;
     @Autowired
     PasswordEncoder codificador;
@@ -63,6 +67,8 @@ class PedidosTest {
     @AfterEach
     void limpiar() {
         pedidos.deleteAll();
+        ventas.deleteAll();
+        lotes.deleteAll();
         productos.deleteAll();
         usuarios.deleteAll();
     }
@@ -145,6 +151,40 @@ class PedidosTest {
         mvc.perform(get("/pedidos/" + id).with(user("ana").roles("ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Acetaminofén")));
+    }
+
+    @Test
+    void registrarElPedidoComoVentaDescuentaInventarioUnaSolaVez() throws Exception {
+        var producto = productos.findById(idProducto).orElseThrow();
+        var lote = new com.leviplus.inventario.model.Lote(producto, "L-PED", LocalDate.now().plusDays(60));
+        lote.sumar(10);
+        lotes.save(lote);
+        mvc.perform(pedidoValido("beto", "ENCARGADO_DE_VENTAS"));
+        Integer id = pedidos.findAll().get(0).getIdPedido();
+
+        mvc.perform(post("/pedidos/" + id + "/registrar-venta").with(user("beto").roles("ENCARGADO_DE_VENTAS")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(lotes.findById(lote.getIdLote()).orElseThrow().getCantidadDisponible()).isEqualTo(7);
+        assertThat(pedidos.findById(id).orElseThrow().isRegistrado()).isTrue();
+
+        // Segundo intento: no vuelve a descontar.
+        mvc.perform(post("/pedidos/" + id + "/registrar-venta").with(user("beto").roles("ENCARGADO_DE_VENTAS")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(lotes.findById(lote.getIdLote()).orElseThrow().getCantidadDisponible()).isEqualTo(7);
+        ventas.deleteAll();
+        lotes.deleteAll();
+    }
+
+    @Test
+    void sinExistenciaElPedidoSigueSinRegistrarse() throws Exception {
+        mvc.perform(pedidoValido("beto", "ENCARGADO_DE_VENTAS"));
+        Integer id = pedidos.findAll().get(0).getIdPedido();
+
+        mvc.perform(post("/pedidos/" + id + "/registrar-venta").with(user("beto").roles("ENCARGADO_DE_VENTAS")).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(pedidos.findById(id).orElseThrow().isRegistrado()).isFalse();
     }
 
     @Test

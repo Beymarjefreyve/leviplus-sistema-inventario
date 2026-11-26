@@ -250,3 +250,66 @@ tr.oculta{display:none}
   .solo-factura #print-area{position:absolute;left:0;top:0;width:100%}
   .solo-factura .card.inv-card{border:0;box-shadow:none;padding:0}
 }
+
+
+/* ---------- Animaciones y microinteracciones ----------
+   Todo es CSS puro (transition / @keyframes). ui.js y venta.js solo añaden o quitan clases.
+   Al final se desactivan para quien tiene "reducir movimiento" en su sistema. */
+:root{--ease:cubic-bezier(.2,.7,.2,1)}
+
+/* Estados hover / active / foco */
+.btn{transition:background-color .15s,transform .12s var(--ease),box-shadow .15s,opacity .15s}
+.btn:hover:not([disabled]){transform:translateY(-1px)}
+.btn:active:not([disabled]){transform:translateY(0) scale(.97)}
+.btn:focus-visible,.qty button:focus-visible,.link:focus-visible{outline:3px solid rgba(30,86,180,.35);outline-offset:2px}
+input,select,textarea{transition:border-color .15s,box-shadow .15s}
+.nav a{transition:background-color .15s,color .15s}
+tbody tr td{transition:background-color .15s}
+.cat-item{transition:background-color .15s}.cat-item:hover{background:#F7FAFF}
+.qty button{transition:background-color .12s,transform .1s}
+.qty button:hover{background:var(--blue-l)}.qty button:active{transform:scale(.88)}
+.opt{transition:border-color .15s,background-color .15s,transform .12s}.opt:hover{border-color:var(--blue)}
+
+/* Entrada de página: el contenido sube y aparece, de a poco */
+@keyframes subir{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes aparece{from{opacity:0}to{opacity:1}}
+.main>*{animation:subir .35s var(--ease) both}
+.main>*:nth-child(2){animation-delay:.04s}.main>*:nth-child(3){animation-delay:.08s}
+.main>*:nth-child(4){animation-delay:.12s}.main>*:nth-child(n+5){animation-delay:.16s}
+tbody tr{animation:aparece .3s both}
+tbody tr:nth-child(2){animation-delay:.03s}tbody tr:nth-child(3){animation-delay:.06s}
+tbody tr:nth-child(4){animation-delay:.09s}tbody tr:nth-child(5){animation-delay:.12s}
+tbody tr:nth-child(6){animation-delay:.15s}tbody tr:nth-child(7){animation-delay:.18s}
+tbody tr:nth-child(n+8){animation-delay:.21s}
+
+/* Mensajes: éxito con palomita animada, error con sacudida, y se retiran solos */
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes sacudir{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.msg{animation:subir .35s var(--ease) both;transition:opacity .4s,transform .4s}
+.msg.saliendo{opacity:0;transform:translateY(-6px)}
+.msg.ok::before{content:'\2713';display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:8px;border-radius:50%;background:var(--teal-d);color:#fff;font-size:12px;font-weight:700;animation:pop .45s var(--ease) .1s both}
+.msg.error,.err{animation:sacudir .4s}
+
+/* Botón enviando: spinner y bloqueo contra doble click */
+@keyframes giro{to{transform:rotate(360deg)}}
+.btn.cargando,.btn.cargando[disabled]{opacity:.85;cursor:progress;pointer-events:none}
+.btn.cargando::before{content:'';width:15px;height:15px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:giro .7s linear infinite}
+.btn.hecho{background:var(--teal-d)}
+
+/* Esqueleto de carga (lista de productos de la venta) */
+@keyframes brillo{from{background-position:200% 0}to{background-position:-200% 0}}
+.sk{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #EDF1F7}
+.sk i{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,#EDF1F7 25%,#F7F9FC 50%,#EDF1F7 75%);background-size:200% 100%;animation:brillo 1.4s linear infinite}
+.sk i:nth-child(1){flex:1;height:14px}.sk i:nth-child(2){width:80px}.sk i:nth-child(3){width:70px;height:30px;border-radius:8px}
+
+/* Carrito: línea nueva entra, línea modificada late, línea quitada sale, total late */
+@keyframes entra{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes latido{40%{transform:scale(1.18);color:var(--blue)}100%{transform:none}}
+.line.nueva{animation:entra .3s var(--ease)}
+.line.cambio .qty span,.line.cambio .bot b{animation:latido .3s}
+.line.saliendo{opacity:0;transform:translateX(16px);transition:opacity .18s,transform .18s}
+#total.sube{animation:latido .3s}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

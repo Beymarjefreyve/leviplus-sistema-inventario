@@ -59,10 +59,18 @@
     <!-- Reporte financiero con balance -->
     <th:block th:if="${reporte != null and tipo == 'financiero'}">
         <div class="stats">
-            <div class="stat"><span class="lbl">Ventas netas</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.ventasNetas, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
-            <div class="stat"><span class="lbl">Otros ingresos</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.otrosIngresos, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
-            <div class="stat"><span class="lbl">Egresos</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.egresos, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
-            <div class="stat dark"><span class="lbl">Balance del periodo</span><b th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.balance, 1, 'POINT', 0, 'COMMA')}">$ 0</b></div>
+            <div class="stat ok"><div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 001 .8h9.6a1 1 0 001-.8L21 7H6"/></svg></i>Ventas netas</div>
+                <span class="v" th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.ventasNetas, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                <span class="n">Sin anuladas, menos devoluciones</span></div>
+            <div class="stat ok"><div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></i>Otros ingresos</div>
+                <span class="v" th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.otrosIngresos, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                <span class="n">Ingresos registrados aparte</span></div>
+            <div class="stat warn"><div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></i>Egresos</div>
+                <span class="v" th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.egresos, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                <span class="n">Compras y gastos del periodo</span></div>
+            <div class="stat"><div class="t"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5C16 5 14 4.5 12 4.5c-2.6 0-4.5 1.2-4.5 3.2 0 5 9.5 2.3 9.5 7.3 0 2-2 3.5-5 3.5-2.2 0-4.2-.7-5-2.5"/></svg></i>Balance del periodo</div>
+                <span class="v" th:text="'$ ' + ${#numbers.formatDecimal(reporte.balance.balance, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                <span class="n">Ingresos menos egresos</span></div>
         </div>
         <section class="card flush">
             <div class="tw">

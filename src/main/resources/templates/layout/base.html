@@ -6,6 +6,7 @@
     <title th:text="${titulo} + ' · Droguería Levi Plus'">Levi Plus</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/ui.js}"></script>
 </head>
 <body>
 
@@ -35,6 +36,9 @@
             <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/proveedores}" th:classappend="${activo == 'proveedores'} ? 'on'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h12v10H2zM14 10h4l4 3v3h-8zM6 19a2 2 0 100-4 2 2 0 000 4zM17 19a2 2 0 100-4 2 2 0 000 4z"/></svg>
                 <span>Proveedores</span></a>
+            <a th:href="@{/escaner}" th:classappend="${activo == 'escaner'} ? 'on'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M7 12h10"/></svg>
+                <span>Escanear producto</span></a>
             <a th:href="@{/existencias}" th:classappend="${activo == 'existencias'} ? 'on'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
                 <span>Consultar existencias</span></a>

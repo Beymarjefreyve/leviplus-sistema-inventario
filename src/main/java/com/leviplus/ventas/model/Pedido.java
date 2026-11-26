@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * RF-29 y RF-30: pedido registrado manualmente (WhatsApp, llamada o presencial), para recoger o a domicilio.
- * No genera venta ni mueve inventario.
+ * Al guardarlo no mueve inventario; al registrarlo como venta se descuenta igual que en una venta normal.
  */
 @Entity
 @Table(name = "pedido")
@@ -65,6 +65,10 @@ public class Pedido {
 
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
+
+    /** Venta generada al registrar el pedido; null mientras esté pendiente. */
+    @Column(name = "id_venta")
+    private Integer idVenta;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     @OrderBy("idDetallePedido ASC")
@@ -140,6 +144,18 @@ public class Pedido {
 
     public LocalDateTime getFechaRegistro() {
         return fechaRegistro;
+    }
+
+    public Integer getIdVenta() {
+        return idVenta;
+    }
+
+    public boolean isRegistrado() {
+        return idVenta != null;
+    }
+
+    public void registrarComoVenta(Integer idVenta) {
+        this.idVenta = idVenta;
     }
 
     public List<DetallePedido> getDetalles() {

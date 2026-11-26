@@ -43,6 +43,23 @@ public class ProductoService {
                 .toList();
     }
 
+    /**
+     * Búsqueda para la pantalla de escáner: si el texto coincide exactamente con un código de producto
+     * (lo que entrega el lector de barras) devuelve solo ese; si no, los que coincidan por nombre o presentación.
+     */
+    @Transactional(readOnly = true)
+    public List<Producto> buscarPorCodigo(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return List.of();
+        }
+        String criterio = texto.trim();
+        List<Producto> encontrados = productos.buscar(criterio);
+        List<Producto> exactos = encontrados.stream()
+                .filter(p -> p.getCodigoProducto().equalsIgnoreCase(criterio))
+                .toList();
+        return exactos.isEmpty() ? encontrados.stream().limit(20).toList() : exactos;
+    }
+
     /** Existencia total (suma de los lotes) por id de producto; sin lotes equivale a cero. */
     @Transactional(readOnly = true)
     public Map<Integer, Long> existencias() {

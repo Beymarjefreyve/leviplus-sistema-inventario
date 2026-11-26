@@ -5,6 +5,7 @@ import com.leviplus.ventas.model.ModalidadPedido;
 import com.leviplus.ventas.model.OrigenPedido;
 import com.leviplus.ventas.service.PedidoService;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Pedidos (RF-29, RF-30): se registran a mano; WhatsApp solo identifica el origen, sin integración.
@@ -28,7 +32,12 @@ import java.time.LocalDate;
 @RequestMapping("/pedidos")
 public class PedidoController {
 
-    private static final int FILAS_FORMULARIO = 8;
+    private static final int RESULTADOS_BUSQUEDA = 20;
+
+    /** Línea del carrito con los datos que necesita la pantalla para dibujarla. */
+    public record LineaCarrito(Integer idProducto, String nombre, String presentacion, String codigo,
+                               java.math.BigDecimal precio, int cantidad) {
+    }
 
     private final PedidoService servicio;
 
@@ -59,9 +68,7 @@ public class PedidoController {
     @GetMapping("/nuevo")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
     public String nuevo(Model modelo) {
-        PedidoForm form = new PedidoForm();
-        completarFilas(form);
-        return formulario(form, modelo);
+        return formulario(new PedidoForm(), modelo);
     }
 
     @PostMapping
@@ -77,7 +84,6 @@ public class PedidoController {
                 errores.reject("negocio", e.getMessage());
             }
         }
-        completarFilas(pedidoForm);
         return formulario(pedidoForm, modelo);
     }
 
@@ -88,19 +94,55 @@ public class PedidoController {
         return "pedidos/pedido-detalle";
     }
 
+    /** Registra el pedido como venta: descuenta el inventario y lleva al comprobante de la venta. */
+    @PostMapping("/{id}/registrar-venta")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
+    public String registrarVenta(@PathVariable Integer id, Authentication autenticacion, RedirectAttributes aviso) {
+        try {
+            var venta = servicio.registrarComoVenta(id, autenticacion.getName());
+            aviso.addFlashAttribute("ok", "Pedido registrado como venta; el inventario ya se descontó");
+            return "redirect:/ventas/" + venta.getIdVenta();
+        } catch (ReglaDeNegocioException e) {
+            aviso.addFlashAttribute("error", e.getMessage());
+            return "redirect:/pedidos/" + id;
+        }
+    }
+
+    /** Buscador del formulario de pedido (JSON): nombre, presentación o código; máximo 20 resultados. */
+    @GetMapping("/productos")
+    @ResponseBody
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
+    public List<PedidoService.ProductoPedible> buscarProductos(@RequestParam(required = false) String q) {
+        return servicio.buscarPedibles(q, RESULTADOS_BUSQUEDA);
+    }
+
     private String formulario(PedidoForm form, Model modelo) {
         modelo.addAttribute("pedidoForm", form);
-        modelo.addAttribute("productos", servicio.productosActivos());
+        modelo.addAttribute("carrito", carritoDe(form));
         modelo.addAttribute("clientes", servicio.clientesFrecuentes());
         modelo.addAttribute("origenes", OrigenPedido.values());
         modelo.addAttribute("modalidades", ModalidadPedido.values());
         return "pedidos/pedido-form";
     }
 
-    /** Rellena con filas vacías hasta las que muestra el formulario. */
-    private void completarFilas(PedidoForm form) {
-        while (form.getLineas().size() < FILAS_FORMULARIO) {
-            form.getLineas().add(new PedidoForm.Linea());
+    /** Reconstruye el carrito con las líneas enviadas, para no perderlas tras un error. */
+    private List<LineaCarrito> carritoDe(PedidoForm form) {
+        List<Integer> ids = new ArrayList<>();
+        for (PedidoForm.Linea linea : form.getLineas()) {
+            if (linea != null && linea.getIdProducto() != null) {
+                ids.add(linea.getIdProducto());
+            }
         }
+        Map<Integer, PedidoService.ProductoPedible> datos = servicio.pediblesPorIds(ids);
+        List<LineaCarrito> carrito = new ArrayList<>();
+        for (PedidoForm.Linea linea : form.getLineas()) {
+            if (linea == null || linea.getIdProducto() == null || !datos.containsKey(linea.getIdProducto())) {
+                continue;
+            }
+            PedidoService.ProductoPedible p = datos.get(linea.getIdProducto());
+            carrito.add(new LineaCarrito(p.idProducto(), p.nombre(), p.presentacion(), p.codigo(), p.precio(),
+                    linea.getCantidad() == null ? 1 : linea.getCantidad()));
+        }
+        return carrito;
     }
 }

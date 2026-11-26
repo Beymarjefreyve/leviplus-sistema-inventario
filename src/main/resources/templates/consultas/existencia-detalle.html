@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base :: cabecera('Lotes del producto')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('existencias')}"></aside>
+<main class="main">
+    <div th:replace="~{layout/base :: volver(@{/existencias}, 'Consultar existencias')}"></div>
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Consultas</span>
+            <h1 th:text="${detalle.producto.nombre}">Producto</h1>
+            <p><span th:text="${detalle.producto.presentacion}">Presentación</span> ·
+                <span th:text="${detalle.producto.codigo}">P-1</span> ·
+                <span th:text="${detalle.producto.laboratorio}">Laboratorio</span><br>
+                Al vender, la existencia se descuenta del lote con vencimiento más próximo. Los lotes vencidos no se venden.</p>
+        </div>
+        <div class="actions">
+            <span class="pill blue">Existencia total: <b th:text="${detalle.producto.existencia}">0</b> und</span>
+        </div>
+    </header>
+
+    <section class="card flush">
+        <div class="tw">
+            <table>
+                <thead><tr><th>Se descuenta</th><th>Lote</th><th>Vence</th><th class="num">Disponible</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="l : ${detalle.lotes}">
+                    <td>
+                        <span class="pill" th:if="${l.orden == 1}" th:text="'1.º (primero)'">1.º</span>
+                        <span class="pill gray" th:if="${l.orden > 1}" th:text="${l.orden} + '.º'">2.º</span>
+                        <small th:if="${l.orden == 0}">—</small>
+                    </td>
+                    <td><b th:text="${l.codigoLote}">L-001</b></td>
+                    <td th:text="${#temporals.format(l.fechaVencimiento, 'dd/MM/yyyy')}">01/01/2027</td>
+                    <td class="num" th:text="${l.disponible} + ' und'">0</td>
+                    <td>
+                        <span class="pill red" th:if="${l.vencido}" th:text="'Vencido hace ' + ${-l.diasRestantes} + ' d'">Vencido</span>
+                        <span class="pill warn" th:if="${!l.vencido and l.porVencer}" th:text="'Vence en ' + ${l.diasRestantes} + ' d'">Por vencer</span>
+                        <span class="pill gray" th:if="${!l.vencido and !l.porVencer and l.disponible == 0}">Agotado</span>
+                        <span class="pill" th:if="${!l.vencido and !l.porVencer and l.disponible > 0}">Vigente</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(detalle.lotes)}">
+                    <td colspan="5" class="empty">Este producto aún no tiene lotes registrados.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</div>
+</body>
+</html>

@@ -24,7 +24,7 @@
     <section class="card flush">
         <div class="tw">
             <table>
-                <thead><tr><th>Código</th><th>Producto</th><th>Laboratorio</th><th class="num">Existencia</th><th>Estado</th></tr></thead>
+                <thead><tr><th>Código</th><th>Producto</th><th>Laboratorio</th><th class="num">Existencia</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
                 <tr th:each="r : ${resultados}">
                     <td th:text="${r.codigo}">P-1</td>
@@ -36,9 +36,10 @@
                     <td class="num"><b th:text="${r.existencia} + ' und'">0</b></td>
                     <td><span class="pill" th:classappend="${r.activo} ? '' : 'gray'"
                               th:text="${r.activo} ? 'Activo' : 'Inactivo'">Activo</span></td>
+                    <td><a class="btn sec" th:href="@{/existencias/{id}(id=${r.idProducto})}">Ver lotes</a></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(resultados)}">
-                    <td colspan="5" class="empty" th:text="${#strings.isEmpty(q)} ? 'No hay productos registrados.' : 'No se encontró ningún producto con ese criterio.'">Sin resultados</td>
+                    <td colspan="6" class="empty" th:text="${#strings.isEmpty(q)} ? 'No hay productos registrados.' : 'No se encontró ningún producto con ese criterio.'">Sin resultados</td>
                 </tr>
                 </tbody>
             </table>
