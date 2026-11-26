@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: cabecera('Comprobante de venta')}"></head>
+<body class="solo-factura">
+<div class="app">
+<aside th:replace="~{layout/base :: menu('historial')}"></aside>
+<main class="main">
+    <th:block sec:authorize="hasRole('ADMINISTRADOR')">
+        <div th:replace="~{layout/base :: volver(@{/ventas}, 'Historial de ventas')}"></div>
+    </th:block>
+    <th:block sec:authorize="!hasRole('ADMINISTRADOR')">
+        <div th:replace="~{layout/base :: volver(@{/ventas/nueva}, 'Registrar venta')}"></div>
+    </th:block>
+
+    <header class="page-h">
+        <div>
+            <h1>Venta V-<span th:text="${venta.idVenta}">1</span>
+                <span class="pill" style="vertical-align:middle;font-size:13px" th:classappend="${venta.anulada} ? 'red'"
+                      th:text="${venta.anulada} ? 'Anulada' : 'Registrada'">Registrada</span></h1>
+            <p>Esta es la factura que se imprime. Los datos internos (lotes, devoluciones y anulación) están más abajo y no se imprimen.</p>
+        </div>
+        <div class="actions">
+            <button type="button" class="btn" onclick="window.print()">Imprimir factura</button>
+            <a class="btn sec" th:href="@{/ventas/nueva}">Nueva venta</a>
+            <a class="btn sec" sec:authorize="hasRole('ADMINISTRADOR')" th:if="${!venta.anulada}"
+               th:href="@{/ventas/{id}/devolucion(id=${venta.idVenta})}">Registrar devolución</a>
+        </div>
+    </header>
+
+    <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="msg error" th:if="${venta.anulada}">Anulada el
+        <span th:text="${#temporals.format(venta.fechaHoraAnulacion, 'dd/MM/yyyy HH:mm')}">fecha</span>
+        por <span th:text="${venta.usuarioAnula.nombreCompleto}">Admin</span>.
+        Motivo: <span th:text="${venta.motivoAnulacion}">motivo</span></div>
+
+    <!-- Factura: es lo único que se imprime (ver las reglas @media print del CSS) -->
+    <section class="card inv-card">
+        <div id="print-area">
+            <div class="inv">
+                <div class="inv-h">
+                    <div class="co">
+                        <img th:src="@{/img/logo.svg}" alt="">
+                        <div>
+                            <b>Droguería Levi Plus</b>
+                            <small>Calle 2 No. 8-98, barrio El Callejón · Cúcuta</small>
+                            <small>Horario: 8:00 a. m. a 9:00 p. m.</small>
+                        </div>
+                    </div>
+                    <div class="inv-n">
+                        <b th:text="'Factura FV-' + ${#numbers.formatInteger(venta.idVenta, 4, 'NONE')}">Factura FV-0001</b>
+                        <small th:text="${#temporals.format(venta.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</small>
+                        <b style="color:#B42318" th:if="${venta.anulada}">ANULADA</b>
+                    </div>
+                </div>
+
+                <div class="meta">
+                    <span><b>Venta:</b> V-<span th:text="${venta.idVenta}">1</span></span>
+                    <span><b>Atendió:</b> <span th:text="${venta.usuario.nombreCompleto}">Usuario</span></span>
+                </div>
+
+                <table>
+                    <thead><tr><th>Producto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Subtotal</th></tr></thead>
+                    <tbody>
+                    <tr th:each="d : ${venta.detalles}">
+                        <td><span th:text="${d.producto.nombre}">Producto</span><br><small style="color:#666" th:text="${d.producto.presentacion}">Presentación</small></td>
+                        <td class="num" th:text="${d.cantidad}">1</td>
+                        <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(d.precioUnitario, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                        <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(d.subtotal, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="tot" style="font-size:14px;font-weight:500" th:if="${totalDevuelto.signum() > 0 and !venta.anulada}">
+                    <span>Subtotal</span><span th:text="'$ ' + ${#numbers.formatDecimal(venta.total, 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                </div>
+                <div class="tot" style="font-size:14px;font-weight:500" th:if="${totalDevuelto.signum() > 0 and !venta.anulada}">
+                    <span>Devoluciones</span><span th:text="'− $ ' + ${#numbers.formatDecimal(totalDevuelto, 1, 'POINT', 0, 'COMMA')}">− $ 0</span>
+                </div>
+                <div class="tot">
+                    <span>TOTAL</span>
+                    <span th:text="'$ ' + ${#numbers.formatDecimal(venta.anulada ? venta.total : venta.total.subtract(totalDevuelto), 1, 'POINT', 0, 'COMMA')}">$ 0</span>
+                </div>
+
+                <p class="note">Gracias por su compra · Su salud es nuestro compromiso<br>
+                    Documento generado por el sistema de la droguería, sin validez fiscal.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Datos internos: no se imprimen -->
+    <section class="card flush">
+        <div class="card-h" style="padding:18px 22px 0"><h2>Lotes descontados</h2></div>
+        <div class="tw">
+            <table>
+                <thead><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="num">Cant. del lote</th><th class="num">Total producto</th></tr></thead>
+                <tbody th:each="d : ${venta.detalles}">
+                <tr th:each="a, st : ${d.lotes}">
+                    <td th:if="${st.first}" th:rowspan="${#lists.size(d.lotes)}"
+                        th:text="${d.producto.nombre} + ' · ' + ${d.producto.presentacion}">Producto</td>
+                    <td th:text="${a.lote.codigoLote}">L1</td>
+                    <td th:text="${#temporals.format(a.lote.fechaVencimiento, 'dd/MM/yyyy')}">01/01/2027</td>
+                    <td class="num" th:text="${a.cantidad}">2</td>
+                    <td th:if="${st.first}" th:rowspan="${#lists.size(d.lotes)}" class="num" th:text="${d.cantidad}">2</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card flush" th:if="${!#lists.isEmpty(devoluciones)}">
+        <div class="card-h" style="padding:18px 22px 0"><h2>Devoluciones</h2></div>
+        <div class="tw">
+            <table>
+                <thead><tr><th>Fecha</th><th>Producto</th><th class="num">Cant.</th><th>Destino</th><th class="num">Valor</th><th>Motivo</th></tr></thead>
+                <tbody th:each="dv : ${devoluciones}">
+                <tr th:each="r : ${dv.detalles}">
+                    <td th:text="${#temporals.format(dv.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                    <td th:text="${r.detalleVenta.producto.nombre}">Producto</td>
+                    <td class="num" th:text="${r.cantidad}">1</td>
+                    <td><span class="pill warn" th:text="${r.destino.etiqueta}">Reintegrar</span></td>
+                    <td class="num" th:text="'$ ' + ${#numbers.formatDecimal(r.valor, 1, 'POINT', 0, 'COMMA')}">$ 0</td>
+                    <td th:text="${dv.motivo}">motivo</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card form" sec:authorize="hasRole('ADMINISTRADOR')" th:if="${!venta.anulada}">
+        <h2>Anular esta venta</h2>
+        <p class="sub" style="margin-bottom:12px">Las unidades que no se hayan devuelto regresan a sus lotes de origen. La venta deja de contar en el balance y en los más vendidos.</p>
+        <form class="fld" th:action="@{/ventas/{id}/anular(id=${venta.idVenta})}" method="post"
+              onsubmit="return confirm('¿Anular esta venta? Esta acción no se puede deshacer.');">
+            <label>Motivo de la anulación
+                <input id="motivo" name="motivo" type="text" maxlength="200" required placeholder="Motivo de la anulación"></label>
+            <div class="form-actions"><button class="btn danger" type="submit">Anular venta</button></div>
+        </form>
+    </section>
+</main>
+</div>
+</body>
+</html>

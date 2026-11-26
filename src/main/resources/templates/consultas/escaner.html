@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/base :: cabecera('Escanear producto')}"></head>
+<body>
+<div class="app">
+<aside th:replace="~{layout/base :: menu('escaner')}"></aside>
+<main class="main">
+    <header class="page-h">
+        <div>
+            <span class="eyebrow">Inventario</span>
+            <h1>Escanear producto</h1>
+            <p>Escanee el código de barras o escríbalo y pulse Enter. Luego elija qué desea hacer con el producto.</p>
+        </div>
+    </header>
+
+    <section class="card">
+        <form th:action="@{/escaner}" method="get" class="filters big-search">
+            <label class="grow">Código del producto
+                <input id="codigo" name="codigo" type="search" maxlength="100" th:value="${codigo}" autofocus
+                       autocomplete="off" placeholder="Escanee o escriba el código y pulse Enter"></label>
+            <button class="btn" type="submit">Buscar</button>
+        </form>
+    </section>
+
+    <div class="msg error" th:if="${buscado and #lists.isEmpty(encontrados)}">
+        No se encontró ningún producto con "<span th:text="${codigo}">código</span>".</div>
+
+    <!-- Un solo producto: menú de opciones -->
+    <section class="card" th:if="${producto != null}"
+             th:with="existencia=${existencias.getOrDefault(producto.idProducto, 0L)}">
+        <div class="card-h">
+            <div class="pcell">
+                <span class="avatar" style="background:#E6EEFA;color:#163F86" th:text="${#strings.toUpperCase(#strings.substring(producto.nombre, 0, 2))}">PR</span>
+                <div><h2 style="margin:0" th:text="${producto.nombre}">Producto</h2>
+                    <small><span th:text="${producto.presentacion}">Presentación</span> · <span th:text="${producto.codigoProducto}">COD</span> · <span th:text="${producto.laboratorio}">Lab</span></small></div>
+            </div>
+            <div>
+                <span class="pill blue">Existencia: <b th:text="${existencia} + ' und'">0</b></span>
+                <span class="pill warn" th:if="${producto.estaActivo() and existencia <= producto.stockMinimo}">Bajo stock</span>
+                <span class="pill gray" th:unless="${producto.estaActivo()}">Inactivo</span>
+            </div>
+        </div>
+
+        <div class="acc" style="margin-top:6px">
+            <a class="btn" th:href="@{/existencias/{id}(id=${producto.idProducto})}">Consultar existencia y lotes</a>
+            <th:block sec:authorize="hasRole('ADMINISTRADOR')">
+                <a class="btn sec" th:if="${producto.estaActivo()}"
+                   th:href="@{/productos/{id}/entrada(id=${producto.idProducto})}">Agregar entrada</a>
+                <a class="btn sec" th:href="@{/productos/{id}/salida(id=${producto.idProducto})}">Registrar salida</a>
+                <a class="btn sec" th:href="@{/productos/{id}/editar(id=${producto.idProducto})}">Editar producto</a>
+            </th:block>
+        </div>
+    </section>
+
+    <!-- Varios resultados: elegir uno -->
+    <section class="card flush" th:if="${producto == null and !#lists.isEmpty(encontrados)}">
+        <div class="card-h" style="padding:18px 22px 0"><h2>Varios productos coinciden</h2></div>
+        <div class="tw">
+            <table>
+                <thead><tr><th>Código</th><th>Producto</th><th class="num">Existencia</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${encontrados}">
+                    <td th:text="${p.codigoProducto}">COD</td>
+                    <td><b th:text="${p.nombre}">Producto</b><br><small th:text="${p.presentacion}">Presentación</small></td>
+                    <td class="num" th:text="${existencias.getOrDefault(p.idProducto, 0L)} + ' und'">0</td>
+                    <td><a class="btn sec" th:href="@{/escaner(codigo=${p.codigoProducto})}">Elegir</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</div>
+</body>
+</html>
