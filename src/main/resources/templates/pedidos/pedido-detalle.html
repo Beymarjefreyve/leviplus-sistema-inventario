@@ -11,11 +11,21 @@
             <span class="eyebrow">Pedidos</span>
             <h1 th:text="'Pedido P-' + ${pedido.idPedido}">Pedido P-1</h1>
             <p>Registrado el <span th:text="${#temporals.format(pedido.fechaRegistro, 'dd/MM/yyyy HH:mm')}">fecha</span>
-               por <span th:text="${pedido.usuario.nombreCompleto}">Usuario</span>. No genera venta ni mueve inventario.</p>
+               por <span th:text="${pedido.usuario.nombreCompleto}">Usuario</span>.
+               <span th:if="${pedido.registrado}">Ya se registró como venta y se descontó del inventario.</span>
+               <span th:unless="${pedido.registrado}">Pendiente: aún no descuenta inventario.</span></p>
+        </div>
+        <div class="actions">
+            <form th:unless="${pedido.registrado}" th:action="@{/pedidos/{id}/registrar-venta(id=${pedido.idPedido})}" method="post"
+                  onsubmit="return confirm('¿Registrar este pedido como venta? Se descontará del inventario.')">
+                <button class="btn" type="submit">Registrar venta</button>
+            </form>
+            <a class="btn sec" th:if="${pedido.registrado}" th:href="@{/ventas/{id}(id=${pedido.idVenta})}" th:text="'Ver venta V-' + ${pedido.idVenta}">Ver venta</a>
         </div>
     </header>
 
     <div class="msg ok" th:if="${ok}" th:text="${ok}"></div>
+    <div class="msg error" th:if="${error}" th:text="${error}"></div>
 
     <section class="card">
         <dl class="datos">

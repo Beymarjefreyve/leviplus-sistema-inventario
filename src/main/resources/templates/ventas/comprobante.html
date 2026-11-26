@@ -94,13 +94,15 @@
         <div class="card-h" style="padding:18px 22px 0"><h2>Lotes descontados</h2></div>
         <div class="tw">
             <table>
-                <thead><tr><th>Producto</th><th>Lotes</th><th class="num">Cant.</th></tr></thead>
-                <tbody>
-                <tr th:each="d : ${venta.detalles}">
-                    <td th:text="${d.producto.nombre} + ' · ' + ${d.producto.presentacion}">Producto</td>
-                    <td><span th:each="a, st : ${d.lotes}"
-                              th:text="|${a.lote.codigoLote} (${a.cantidad})${st.last ? '' : ', '}|">L1 (2)</span></td>
-                    <td class="num" th:text="${d.cantidad}">1</td>
+                <thead><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="num">Cant. del lote</th><th class="num">Total producto</th></tr></thead>
+                <tbody th:each="d : ${venta.detalles}">
+                <tr th:each="a, st : ${d.lotes}">
+                    <td th:if="${st.first}" th:rowspan="${#lists.size(d.lotes)}"
+                        th:text="${d.producto.nombre} + ' · ' + ${d.producto.presentacion}">Producto</td>
+                    <td th:text="${a.lote.codigoLote}">L1</td>
+                    <td th:text="${#temporals.format(a.lote.fechaVencimiento, 'dd/MM/yyyy')}">01/01/2027</td>
+                    <td class="num" th:text="${a.cantidad}">2</td>
+                    <td th:if="${st.first}" th:rowspan="${#lists.size(d.lotes)}" class="num" th:text="${d.cantidad}">2</td>
                 </tr>
                 </tbody>
             </table>

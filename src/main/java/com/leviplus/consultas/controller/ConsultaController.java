@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /** Alertas (RF-06, RF-07, RF-17) y consulta de existencias (RF-18). */
@@ -31,5 +32,13 @@ public class ConsultaController {
         modelo.addAttribute("q", q == null ? "" : q.trim());
         modelo.addAttribute("resultados", servicio.buscarExistencia(q));
         return "consultas/existencias";
+    }
+
+    /** Desglose de lotes de un producto: de cuál se descuenta primero al vender. */
+    @GetMapping("/existencias/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ENCARGADO_DE_VENTAS')")
+    public String detalleExistencia(@PathVariable Integer id, Model modelo) {
+        modelo.addAttribute("detalle", servicio.detalleExistencia(id));
+        return "consultas/existencia-detalle";
     }
 }

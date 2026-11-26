@@ -134,6 +134,7 @@ CREATE TABLE pedido (
     observaciones  VARCHAR(250),
     id_usuario     INTEGER      NOT NULL REFERENCES usuario (id_usuario),
     fecha_registro TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_venta       INTEGER REFERENCES venta (id_venta),
     CONSTRAINT ck_pedido_direccion CHECK (modalidad <> 'domicilio' OR direccion IS NOT NULL)
 );
 

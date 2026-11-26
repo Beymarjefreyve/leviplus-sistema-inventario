@@ -9,7 +9,7 @@
         <div>
             <span class="eyebrow">Ventas</span>
             <h1>Pedidos</h1>
-            <p>Pedidos recibidos por WhatsApp, llamada o en el mostrador, para recoger o a domicilio. Se registran a mano y no descuentan inventario.</p>
+            <p>Pedidos recibidos por WhatsApp, llamada o en el mostrador, para recoger o a domicilio. Se registran a mano y no descuentan inventario hasta que pulses «Registrar venta» en el pedido.</p>
         </div>
         <div class="actions"><a class="btn" th:href="@{/pedidos/nuevo}">Registrar pedido</a></div>
     </header>
@@ -35,7 +35,7 @@
         <div class="tools"><input type="search" data-filtra="tabla-pedidos" placeholder="Buscar por cliente, teléfono u origen" aria-label="Buscar" autocomplete="off"></div>
         <div class="tw">
             <table id="tabla-pedidos">
-                <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Origen</th><th>Modalidad</th><th></th></tr></thead>
+                <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Origen</th><th>Modalidad</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
                 <tr th:each="p : ${pedidos}">
                     <td><b th:text="'P-' + ${p.idPedido}">P-1</b></td>
@@ -44,10 +44,19 @@
                     <td th:text="${p.telefono}">3000000000</td>
                     <td><span class="pill" th:text="${p.origen.etiqueta}">WhatsApp</span></td>
                     <td th:text="${p.modalidad.etiqueta}">A domicilio</td>
-                    <td><a th:href="@{/pedidos/{id}(id=${p.idPedido})}">Ver detalle</a></td>
+                    <td><span class="pill" th:if="${p.registrado}">Vendido</span>
+                        <span class="pill warn" th:unless="${p.registrado}">Pendiente</span></td>
+                    <td style="white-space:nowrap">
+                        <a th:href="@{/pedidos/{id}(id=${p.idPedido})}">Ver detalle</a>
+                        <form th:unless="${p.registrado}" th:action="@{/pedidos/{id}/registrar-venta(id=${p.idPedido})}" method="post" style="display:inline;margin-left:10px"
+                              onsubmit="return confirm('¿Registrar este pedido como venta? Se descontará del inventario.')">
+                            <button class="btn sm" type="submit">Registrar venta</button>
+                        </form>
+                        <a th:if="${p.registrado}" th:href="@{/ventas/{id}(id=${p.idVenta})}" style="margin-left:10px" th:text="'V-' + ${p.idVenta}">V-1</a>
+                    </td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(pedidos)}"><td colspan="7" class="empty">No hay pedidos en el periodo seleccionado.</td></tr>
-                <tr class="sin-resultados"><td colspan="7" class="empty">No se encontraron resultados.</td></tr>
+                <tr th:if="${#lists.isEmpty(pedidos)}"><td colspan="8" class="empty">No hay pedidos en el periodo seleccionado.</td></tr>
+                <tr class="sin-resultados"><td colspan="8" class="empty">No se encontraron resultados.</td></tr>
                 </tbody>
             </table>
         </div>

@@ -22,6 +22,10 @@
     });
     var resultados = [];
     var temporizador = null;
+    var reducir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var animar = null;          // línea que acaba de cambiar: { id, tipo: 'nueva' | 'cambio' }
+    var totalMostrado = 0;
+    var tweenTotal = null;
 
     function dinero(n) { return '$ ' + Math.round(n).toLocaleString('es-CO'); }
     function el(tag, clase, texto) {
@@ -33,6 +37,45 @@
     function mensaje(texto) {
         aviso.textContent = texto || '';
         aviso.style.display = texto ? 'block' : 'none';
+    }
+
+    // Esqueleto de carga mientras llega la primera lista de productos.
+    function esqueleto() {
+        cajaResultados.replaceChildren();
+        for (var i = 0; i < 4; i++) {
+            var f = el('div', 'sk');
+            f.appendChild(el('i')); f.appendChild(el('i')); f.appendChild(el('i'));
+            cajaResultados.appendChild(f);
+        }
+    }
+
+    // Confirmación breve en el botón "Agregar".
+    function confirmarBoton(b) {
+        b.textContent = '✓ Agregado';
+        b.classList.add('hecho');
+        setTimeout(function () { b.textContent = 'Agregar'; b.classList.remove('hecho'); }, 700);
+    }
+
+    // El total cuenta hasta su nuevo valor en vez de cambiar de golpe.
+    function mostrarTotal(nuevo) {
+        if (tweenTotal) { cancelAnimationFrame(tweenTotal); tweenTotal = null; }
+        var desde = totalMostrado;
+        totalMostrado = nuevo;
+        if (desde === nuevo) { lblTotal.textContent = dinero(nuevo); return; }
+        lblTotal.classList.remove('sube');
+        void lblTotal.offsetWidth;
+        lblTotal.classList.add('sube');
+        if (reducir) { lblTotal.textContent = dinero(nuevo); return; }
+        var inicio = null;
+        function paso(t) {
+            if (inicio === null) { inicio = t; }
+            var k = Math.min(1, (t - inicio) / 250);
+            var suave = 1 - Math.pow(1 - k, 3);
+            lblTotal.textContent = dinero(desde + (nuevo - desde) * suave);
+            if (k < 1) { tweenTotal = requestAnimationFrame(paso); }
+            else { tweenTotal = null; lblTotal.textContent = dinero(nuevo); }
+        }
+        tweenTotal = requestAnimationFrame(paso);
     }
 
     // ---- búsqueda ----
@@ -64,7 +107,7 @@
             fila.appendChild(precio);
             var boton = el('button', 'btn sm', 'Agregar');
             boton.type = 'button';
-            boton.addEventListener('click', function () { agregar(p); entrada.focus(); });
+            boton.addEventListener('click', function () { agregar(p); entrada.focus(); confirmarBoton(boton); });
             fila.appendChild(boton);
             cajaResultados.appendChild(fila);
         });
@@ -93,11 +136,12 @@
         mensaje('');
         var linea = carrito.filter(function (l) { return l.id === p.idProducto; })[0];
         if (linea) {
-            if (linea.cantidad < linea.existencia) { linea.cantidad++; }
+            if (linea.cantidad < linea.existencia) { linea.cantidad++; animar = { id: linea.id, tipo: 'cambio' }; }
             else { mensaje('No hay más existencia de ' + p.nombre + ' (' + p.existencia + ' disponibles).'); }
         } else {
             carrito.push({ id: p.idProducto, nombre: p.nombre, presentacion: p.presentacion, codigo: p.codigo,
                            precio: Number(p.precio), existencia: Number(p.existencia), cantidad: 1 });
+            animar = { id: p.idProducto, tipo: 'nueva' };
         }
         dibujarCarrito();
     }
@@ -106,12 +150,17 @@
         var linea = carrito.filter(function (l) { return l.id === id; })[0];
         if (!linea) { return; }
         linea.cantidad = Math.max(1, linea.cantidad + delta);
+        animar = { id: id, tipo: 'cambio' };
         dibujarCarrito();
     }
 
-    function quitar(id) {
-        carrito = carrito.filter(function (l) { return l.id !== id; });
-        dibujarCarrito();
+    function quitar(id, fila) {
+        var hacer = function () {
+            carrito = carrito.filter(function (l) { return l.id !== id; });
+            dibujarCarrito();
+        };
+        if (fila && !reducir) { fila.classList.add('saliendo'); setTimeout(hacer, 180); }
+        else { hacer(); }
     }
 
     function dibujarCarrito() {
@@ -129,12 +178,13 @@
             if (pasa) { excede = true; }
 
             var fila = el('div', 'line');
+            if (animar && animar.id === l.id) { fila.classList.add(animar.tipo); }
             var arriba = el('div', 'top');
             arriba.appendChild(el('span', '', l.nombre + ' · ' + l.presentacion));
             var quitarBtn = el('button', 'link red', 'Quitar');
             quitarBtn.type = 'button';
             quitarBtn.setAttribute('aria-label', 'Quitar ' + l.nombre);
-            quitarBtn.addEventListener('click', function () { quitar(l.id); });
+            quitarBtn.addEventListener('click', function () { quitar(l.id, fila); });
             arriba.appendChild(quitarBtn);
             fila.appendChild(arriba);
 
@@ -158,7 +208,8 @@
             cajaOcultos.appendChild(h1); cajaOcultos.appendChild(h2);
         });
 
-        lblTotal.textContent = dinero(total);
+        animar = null;
+        mostrarTotal(total);
         lblUnidades.textContent = String(unidades);
         lblCantidad.textContent = carrito.length + (carrito.length === 1 ? ' producto' : ' productos');
         botonConfirmar.disabled = !carrito.length || excede;
@@ -167,6 +218,7 @@
     botonVaciar.addEventListener('click', function () { carrito = []; mensaje(''); dibujarCarrito(); entrada.focus(); });
 
     dibujarCarrito();
+    esqueleto();
     buscar();
     entrada.focus();
 })();
